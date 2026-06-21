@@ -1,0 +1,10 @@
+[package]
+name = "lingmo-repository-manager"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+lingmo-core-engine = { path = "../core-engine" }
+tracing.workspace = true
+serde.workspace = true

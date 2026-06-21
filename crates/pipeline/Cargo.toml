@@ -1,0 +1,15 @@
+[package]
+name = "lingmo-pipeline"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+lingmo-core-engine = { path = "../core-engine" }
+lingmo-plugins = { path = "../plugins" }
+lingmo-config-parser = { path = "../config-parser" }
+lingmo-iso-builder = { path = "../iso-builder" }
+lingmo-volume-manager = { path = "../volume-manager" }
+lingmo-repository-manager = { path = "../repository-manager" }
+tracing.workspace = true
+serde.workspace = true

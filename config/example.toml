@@ -1,0 +1,177 @@
+# ============================================================================
+# Lingmo Builder Configuration - KDE Plasma Desktop Live ISO
+# ============================================================================
+# This configuration builds a bootable Debian-based live ISO with KDE Plasma
+# desktop, Calamares installer, NVIDIA support, and NetworkManager.
+
+[distro]
+name = "LingmoOS"
+version = "2026.1"
+codename = "trixie"
+mirror = "https://mirrors.tuna.tsinghua.edu.cn/debian"
+architecture = "amd64"
+components = ["main", "contrib", "non-free", "non-free-firmware"]
+
+profile = "desktop"
+desktop = "kde"
+
+[installer]
+type = "calamares"
+# type = "debian-installer"
+# mode = "graphical"
+
+# ============================================================================
+# Repository Configuration
+# ============================================================================
+# DEB822 format is used by default (Debian 12+).
+# Legacy .list files are NOT generated.
+
+[repositories]
+default_format = "deb822"
+
+[repositories.debian]
+mirror = "https://mirrors.tuna.tsinghua.edu.cn/debian"
+security_mirror = "https://mirrors.tuna.tsinghua.edu.cn/debian-security"
+suite = "trixie"
+components = ["main", "contrib", "non-free", "non-free-firmware"]
+# Enable source repositories (optional, slows apt update)
+source_enabled = false
+
+[[repositories.extra]]
+name = "lingmo"
+repo_type = "obs"
+url = "http://download.opensuse.org/repositories/home:/LingmoOS/Debian_13/"
+suite = "/"
+key_url = "https://download.opensuse.org/repositories/home:LingmoOS/Debian_13/Release.key"
+key_path = "/etc/apt/keyrings/lingmo.gpg"
+enabled = true
+
+# ============================================================================
+# Package Management
+# ============================================================================
+
+[packages]
+additional = [
+    "firefox-esr",
+    "libreoffice",
+    "gimp",
+    "vlc",
+    "celluloid",
+    "thunderbird",
+    "keepassxc",
+    "nextcloud-desktop",
+    "teams-for-linux",
+    "onlyoffice-desktopeditors",
+]
+remove = [
+    "gnome-games",
+    "airodump-ng",
+]
+
+[packages.pin_priorities]
+# Pin Debian backports to lower priority
+"*" = 500
+"linux-image-amd64" = 1001
+
+# ============================================================================
+# System Configuration
+# ============================================================================
+
+[system]
+hostname = "lingmo"
+locale = "en_US.UTF-8"
+timezone = "America/New_York"
+keyboard_layout = "us"
+kernel_cmdline = "quiet splash loglevel=3 systemd.show_status=auto"
+
+[[system.users]]
+username = "live"
+password_hash = "$y$j9T$cPgCx8DqL9YzEQkGqU/Vl1$C7jhMq6x3wbzG5qF2vH8sL0nW9Xy2R4tB6vN8mP1kD"  # live
+shell = "/bin/bash"
+groups = ["sudo", "audio", "video", "cdrom", "plugdev", "netdev", "bluetooth"]
+sudo = true
+
+[[system.users]]
+username = "root"
+password_hash = "$y$j9T$cPgCx8DqL9YzEQkGqU/Vl1$C7jhMq6x3wbzG5qF2vH8sL0nW9Xy2R4tB6vN8mP1kD"  # root
+shell = "/bin/bash"
+groups = []
+sudo = false
+
+[system.fstab]
+# Add custom fstab entries (optional)
+
+# ============================================================================
+# Output Configuration
+# ============================================================================
+
+[output]
+iso_name = "lingmo-2026.1-amd64.iso"
+iso_label = "LINGMO_2026"
+iso_volume = "LINGMO_OS_2026_1"
+output_dir = "./output"
+work_dir = "./work"
+squashfs_compression = "zstd"
+squashfs_block_size = 262144
+
+# ============================================================================
+# Multi-Volume SquashFS
+# ============================================================================
+# Splits the root filesystem into multiple SquashFS volumes.
+#
+# Strategies:
+#   single  - one volume (traditional, default)
+#   size    - split by size threshold
+#   plugin  - one volume per plugin group (core, desktop, drivers, etc.)
+#   profile - split core vs desktop files
+
+[volume]
+strategy = "size"
+max_volume_size = 1073741824    # 1 GiB per volume
+compression = "zstd"
+block_size = 131072
+output_pattern = "filesystem.part{}.squashfs"
+generate_manifest = true
+verify_checksums = true
+
+# ============================================================================
+# Caching
+# ============================================================================
+
+[cache]
+enabled = true
+directory = "./cache"
+stages = ["bootstrap", "install-base", "install-kernel"]
+
+# ============================================================================
+# Plugins
+# ============================================================================
+
+plugins = [
+    "core",
+    "kde",
+    "networkmanager",
+    "nvidia",
+]
+
+# ============================================================================
+# Custom Hooks
+# ============================================================================
+
+[[hooks]]
+name = "disable-sleep"
+script = """
+systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+"""
+stage = "chroot-hooks"
+chroot = true
+order = 80
+
+[[hooks]]
+name = "set-default-target"
+script = """
+systemctl set-default graphical.target
+"""
+stage = "system-config"
+chroot = true
+order = 10

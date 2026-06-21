@@ -1,0 +1,12 @@
+[package]
+name = "lingmo-core-engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+sha2.workspace = true
