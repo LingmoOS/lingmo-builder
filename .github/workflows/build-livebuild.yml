@@ -33,26 +33,39 @@ jobs:
             mtools dosfstools \
             gpg cpio zstd \
             gettext \
-            sudo \
-            git
+            sudo git jq
 
-      - name: Configure live-build
-        working-directory: builder
+      - name: Free up disk space
         run: |
-          sudo lb config -a amd64 --distribution trixie -- --variant default
+          echo "=== Disk space before cleanup ==="
+          df -h
+          apt-get clean
+          rm -rf /var/cache/apt/archives/*.deb 2>/dev/null || true
+          rm -rf /tmp/* 2>/dev/null || true
+          echo "=== Disk space after cleanup ==="
+          df -h
+
+      - name: Create debian-cd symlink
+        run: |
+          ln -sf sid /usr/share/live/build/data/debian-cd/trixie 2>/dev/null || true
 
       - name: Build ISO
         working-directory: builder
         run: |
-          sudo lb build 2>&1
+          sudo ./build.sh \
+            --distribution trixie \
+            --arch amd64 \
+            --variant default \
+            --verbose
 
       - name: Stage artifacts
         run: |
           mkdir -p artifact
-          find builder -name "*.iso" -exec cp -v {} artifact/ \;
+          cp -v builder/images/*.iso artifact/ 2>/dev/null || echo "No ISO in builder/images/"
+          find builder -name "*.iso" -exec cp -v {} artifact/ \; 2>/dev/null || true
           if ! ls artifact/*.iso 2>/dev/null; then
-            echo "No ISO files found, listing builder contents:"
-            find builder -maxdepth 3 -type f | head -50
+            echo "No ISO files found"
+            find builder -maxdepth 3 -type f -name "*.iso" -o -name "*.hybrid.iso" 2>/dev/null | head -10
           fi
 
       - name: Upload ISO
