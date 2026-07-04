@@ -1,0 +1,87 @@
+name: Build ISO via lmforge
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  build:
+    name: Build ISO with lmforge
+    runs-on: ubuntu-latest
+    container:
+      image: debian:trixie
+      options: --privileged
+    steps:
+      - name: Checkout lingmo-builder (overlay config)
+        uses: actions/checkout@v4
+        with:
+          path: lingmo-builder
+
+      - name: Checkout lmforge
+        uses: actions/checkout@v4
+        with:
+          repository: LingmoOS/lmforge
+          path: lmforge
+
+      - name: Install system dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates curl \
+            live-build debootstrap \
+            xorriso squashfs-tools \
+            mtools dosfstools \
+            gpg cpio zstd \
+            build-essential pkg-config libssl-dev \
+            sudo \
+            git
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: lmforge
+
+      - name: Build lmforge
+        working-directory: lmforge
+        run: cargo build --release
+
+      - name: Build ISO
+        working-directory: lmforge
+        run: |
+          sudo ./target/release/lmforge \
+            --arch amd64 \
+            --suite trixie \
+            --output "${{ github.workspace }}/output" \
+            --workspace "${{ github.workspace }}/workspace" \
+            -vv \
+            build iso official \
+              --desktop \
+              --live \
+              --overlay "${{ github.workspace }}/lingmo-builder/builder/lingmo-config" \
+              --clean
+
+      - name: Stage artifacts
+        run: |
+          mkdir -p artifact
+          cp -v output/*.iso artifact/ 2>/dev/null || echo "No ISO files found"
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: lmforge-iso
+          path: artifact/
+          compression-level: 0
+          if-no-files-found: warn
