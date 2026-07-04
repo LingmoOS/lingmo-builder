@@ -24,14 +24,10 @@ jobs:
     steps:
       - name: Checkout lingmo-builder (overlay config)
         uses: actions/checkout@v4
-        with:
-          path: lingmo-builder
 
-      - name: Checkout lmforge
-        uses: actions/checkout@v4
-        with:
-          repository: LingmoOS/lmforge
-          path: lmforge
+      - name: Clone lmforge
+        run: |
+          git clone https://github.com/LingmoOS/lmforge.git lmforge
 
       - name: Install system dependencies
         run: |
@@ -79,7 +75,7 @@ jobs:
             build iso official \
               --desktop \
               --live \
-              --overlay "${{ github.workspace }}/lingmo-builder/builder/lingmo-config" \
+              --overlay "${{ github.workspace }}/builder/lingmo-config" \
               --clean
 
       - name: Stage artifacts
