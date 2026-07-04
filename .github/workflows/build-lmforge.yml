@@ -25,10 +25,6 @@ jobs:
       - name: Checkout lingmo-builder (overlay config)
         uses: actions/checkout@v4
 
-      - name: Clone lmforge
-        run: |
-          git clone https://github.com/LingmoOS/lmforge.git lmforge
-
       - name: Install system dependencies
         run: |
           apt-get update
@@ -50,6 +46,10 @@ jobs:
           rm -rf /tmp/* 2>/dev/null || true
           echo "=== Disk space after cleanup ==="
           df -h
+
+      - name: Clone lmforge
+        run: |
+          git clone https://github.com/LingmoOS/lmforge.git lmforge
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
