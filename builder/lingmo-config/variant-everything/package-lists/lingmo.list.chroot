@@ -13,7 +13,7 @@ base-files
 ## linux-core
 velora-desktop-environment-core
 velora-desktop-environment-base
-vlora-desktop-environment-extras
+velora-desktop-environment-extras
 ftp
 openssh-client
 openssh-server
@@ -34,7 +34,7 @@ zsh-syntax-highlighting
 # Graphical desktops
 velora-desktop-environment-core
 velora-desktop-environment-base
-vlora-desktop-environment-extras
+velora-desktop-environment-extras
 lingmo-plymouth
 lingmo-oobe
 sddm
