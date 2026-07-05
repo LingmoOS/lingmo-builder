@@ -49,5 +49,3 @@ if [[ $get_arch =~ "x86_64" ]]; then
   apt install -y --no-install-recommends ./onlyoffice.deb
   rm -rfv ./onlyoffice.deb
 fi
-
-chmod +x /bin/config-installer
