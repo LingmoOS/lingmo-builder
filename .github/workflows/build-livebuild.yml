@@ -27,7 +27,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
-            ca-certificates curl \
+            apt-utils ca-certificates curl \
             live-build debootstrap \
             xorriso squashfs-tools \
             mtools dosfstools \
