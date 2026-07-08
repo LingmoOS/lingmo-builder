@@ -2,6 +2,18 @@
 velora-desktop-environment-core
 velora-desktop-environment-base
 velora-desktop-environment-extras
+lingmo-wallpapers
+lingmo-dock
+ddm
+treeland
+treeland-wayland-session
+deepin-desktop-theme
+velora-gtk-theme
+lingmo-desktop-base
+lingmo-kwin-x11
+lingmo-kwin-wayland
+lingmo-plymouth
+lingmo-sddm-theme
 
 # App Store
 packagekit-tools 

@@ -49,3 +49,5 @@ if [[ $get_arch =~ "x86_64" ]]; then
   apt install -y --no-install-recommends ./onlyoffice.deb
   rm -rfv ./onlyoffice.deb
 fi
+
+apt install -y base-files --reinstall | true
