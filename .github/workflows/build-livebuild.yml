@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   DEBIAN_FRONTEND: noninteractive
@@ -75,3 +75,62 @@ jobs:
           path: artifact/
           compression-level: 0
           if-no-files-found: warn
+
+      - name: Generate version tag
+        id: version
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          source tools/build_version.sh
+          TAG="livebuild-$(generate_build_ver)"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Publish to GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.version.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          ARCHIVE=$(ls -1 artifact/*.iso 2>/dev/null | head -1)
+
+          if [ -z "${ARCHIVE}" ]; then
+            echo "No ISO file found in artifact/"
+            exit 1
+          fi
+
+          echo "Release 文件: ${ARCHIVE}"
+          ls -lh "${ARCHIVE}"
+          SIZE=$(stat -c%s "${ARCHIVE}")
+          echo "文件大小: ${SIZE} bytes"
+
+          # GitHub Release 单个文件限制 2GB，超过则分片上传
+          if [ "${SIZE}" -gt 2147483648 ]; then
+            echo "文件超过 2GB，创建 Release 后分片上传"
+            gh release create "${TAG}" \
+              --repo "${{ github.repository }}" \
+              --title "Lingmo ISO Build ${TAG}" \
+              --notes "自动构建的 Lingmo Live ISO" \
+              --target "${{ github.ref_name }}" \
+              --latest=false
+
+            split -b 1900M "${ARCHIVE}" "${ARCHIVE}.part-"
+            for part in "${ARCHIVE}".part-*; do
+              echo "上传分片: $(basename "${part}") ($(du -h "${part}" | cut -f1))"
+              gh release upload "${TAG}" "${part}" \
+                --repo "${{ github.repository }}" \
+                --clobber
+            done
+
+            echo "清理分片文件"
+            rm -f "${ARCHIVE}".part-*
+          else
+            echo "创建 Release（含文件）: ${TAG}"
+            gh release create "${TAG}" \
+              "${ARCHIVE}" \
+              --repo "${{ github.repository }}" \
+              --title "Lingmo ISO Build ${TAG}" \
+              --notes "自动构建的 Lingmo Live ISO" \
+              --target "${{ github.ref_name }}" \
+              --latest=false
+          fi
+
+          echo "Release ${TAG} 创建完成"
