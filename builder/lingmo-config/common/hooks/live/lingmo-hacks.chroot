@@ -30,11 +30,6 @@ for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'linux-im
   apt-mark hold $pkg | true
 done
 
-# Mark lingmo DE as manually installed
-for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'lingmo*' | sed -ne 's/^installed //p'); do
-  apt-mark manual $pkg | true
-done
-
 # Remove unwanted packages
 apt remove systemsettings -y | true
 # apt remove network-manager-gnome konsole kde-baseapps -y | true
@@ -51,3 +46,33 @@ if [[ $get_arch =~ "x86_64" ]]; then
 fi
 
 apt install -y base-files --reinstall | true
+
+apt install -y \
+    velora-desktop-environment-core \
+    velora-desktop-environment-base \
+    velora-desktop-environment-extras \
+    lingmo-wallpapers \
+    lingmo-dock \
+    ddm \
+    deepin-update-ui \
+    treeland \
+    treeland-wayland-session \
+    deepin-desktop-theme \
+    velora-gtk-theme \
+    lingmo-desktop-base \
+    lingmo-kwin-x11 \
+    lingmo-kwin-wayland \
+    lingmo-sddm-theme \
+    lingmo-plymouth \
+    lingmo-oobe \
+    sddm \
+    xorg
+
+# Mark lingmo DE as manually installed
+for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'lingmo*' | sed -ne 's/^installed //p'); do
+  apt-mark manual $pkg | true
+done
+
+for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'deepin-update-ui' | sed -ne 's/^installed //p'); do
+  apt-mark manual $pkg | true
+done
