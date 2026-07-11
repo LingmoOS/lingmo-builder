@@ -20,7 +20,8 @@ ddm
 deepin-update-ui
 treeland
 treeland-wayland-session
-deepin-desktop-theme
+lingmo-desktop-theme
+lingmo-theme-classic
 velora-gtk-theme
 lingmo-desktop-base
 lingmo-kwin-x11
@@ -58,7 +59,8 @@ ddm
 deepin-update-ui
 treeland
 treeland-wayland-session
-deepin-desktop-theme
+lingmo-desktop-theme
+lingmo-theme-classic
 velora-gtk-theme
 lingmo-desktop-base
 lingmo-kwin-x11
