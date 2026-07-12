@@ -80,7 +80,7 @@ jobs:
         id: version
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          source tools/build_version.sh
+          . tools/build_version.sh
           TAG="livebuild-$(generate_build_ver)"
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
