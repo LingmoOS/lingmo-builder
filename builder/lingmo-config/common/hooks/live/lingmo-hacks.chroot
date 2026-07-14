@@ -48,18 +48,18 @@ fi
 apt install -y base-files --reinstall | true
 
 apt install -y \
-    velora-desktop-environment-core \
-    velora-desktop-environment-base \
-    velora-desktop-environment-extras \
+    lingmo-desktop-environment-core \
+    lingmo-desktop-environment-base \
+    lingmo-desktop-environment-extras \
     lingmo-wallpapers \
     lingmo-dock \
     ddm \
-    deepin-update-ui \
+    lingmo-update-ui \
     treeland \
     treeland-wayland-session \
     lingmo-desktop-theme \
     lingmo-theme-classic \
-    velora-gtk-theme \
+    lingmo-gtk-theme \
     lingmo-desktop-base \
     lingmo-kwin-x11 \
     lingmo-kwin-wayland \
@@ -74,6 +74,6 @@ for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'lingmo*'
   apt-mark manual $pkg | true
 done
 
-for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'deepin-update-ui' | sed -ne 's/^installed //p'); do
+for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'lingmo-update-ui' | sed -ne 's/^installed //p'); do
   apt-mark manual $pkg | true
 done

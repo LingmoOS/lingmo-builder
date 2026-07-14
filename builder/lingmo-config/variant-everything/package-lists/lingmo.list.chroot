@@ -11,18 +11,18 @@
 base-files
 
 ## linux-core
-velora-desktop-environment-core
-velora-desktop-environment-base
-velora-desktop-environment-extras
+lingmo-desktop-environment-core
+lingmo-desktop-environment-base
+lingmo-desktop-environment-extras
 lingmo-wallpapers
 lingmo-dock
 ddm
-deepin-update-ui
+lingmo-update-ui
 treeland
 treeland-wayland-session
 lingmo-desktop-theme
 lingmo-theme-classic
-velora-gtk-theme
+lingmo-gtk-theme
 lingmo-desktop-base
 lingmo-kwin-x11
 lingmo-kwin-wayland
@@ -50,18 +50,18 @@ zsh-syntax-highlighting
 # lingmo-linux-large
 
 # Graphical desktops
-velora-desktop-environment-core
-velora-desktop-environment-base
-velora-desktop-environment-extras
+lingmo-desktop-environment-core
+lingmo-desktop-environment-base
+lingmo-desktop-environment-extras
 lingmo-wallpapers
 lingmo-dock
 ddm
-deepin-update-ui
+lingmo-update-ui
 treeland
 treeland-wayland-session
 lingmo-desktop-theme
 lingmo-theme-classic
-velora-gtk-theme
+lingmo-gtk-theme
 lingmo-desktop-base
 lingmo-kwin-x11
 lingmo-kwin-wayland
@@ -71,6 +71,11 @@ lingmo-oobe
 sddm
 xorg
 lingmo-kwin-x11
+lingmo-calendar
+lingmo-qt6xcb-plugin
+lingmo-grand-search
+lingmo-qt5wayland-plugin
+lingmo-application-manager-api
 
 # Live configs
 live-boot
