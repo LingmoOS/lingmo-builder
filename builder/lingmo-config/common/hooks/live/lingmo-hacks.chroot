@@ -49,6 +49,7 @@ apt install -y base-files --reinstall | true
 
 apt install -y \
     appmotor \
+    base-files \
     liblingmo \
     liblingmo-filemanager \
     lingmo-appearance-common \
