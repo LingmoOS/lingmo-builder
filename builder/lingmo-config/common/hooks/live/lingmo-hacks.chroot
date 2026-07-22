@@ -48,32 +48,44 @@ fi
 apt install -y base-files --reinstall | true
 
 apt install -y \
-    lingmo-desktop-environment-core \
-    lingmo-desktop-environment-base \
-    lingmo-desktop-environment-extras \
-    lingmo-wallpapers \
+    appmotor \
+    liblingmo \
+    liblingmo-filemanager \
+    lingmo-appearance-common \
+    lingmo-appearance-decoration \
+    lingmo-appearance-qt6 \
+    lingmo-appearance-settings \
+    lingmo-appearance \
+    lingmo-calculator \
+    lingmo-core \
+    lingmo-cursor-themes \
+    lingmo-daemon \
+    lingmo-desktop \
     lingmo-dock \
-    ddm \
-    lingmo-update-ui \
-    treeland \
-    treeland-wayland-session \
-    lingmo-desktop-theme \
-    lingmo-theme-classic \
-    lingmo-gtk-theme \
-    lingmo-desktop-base \
-    lingmo-kwin-x11 \
-    lingmo-kwin-wayland \
-    lingmo-sddm-theme \
-    lingmo-plymouth \
+    lingmo-filemanager \
+    lingmo-grub-config \
+    lingmo-gtk-themes \
+    lingmo-installer \
+    lingmo-installer-config \
     lingmo-oobe \
+    lingmo-kwin-plugins-roundedwindow \
+    lingmo-launcher \
+    lingmo-qt-plugins \
+    lingmo-screenlocker \
+    lingmo-screenshot \
+    lingmo-sddm-theme \
+    lingmo-settings \
+    lingmo-statusbar \
+    lingmo-system-monitor \
+    lingmo-terminal \
+    lingmo-wallpapers \
+    lingmo-watchdog \
+    lingmoui \
+    lingmo-plymouth \
     sddm \
     xorg
 
 # Mark lingmo DE as manually installed
 for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'lingmo*' | sed -ne 's/^installed //p'); do
-  apt-mark manual $pkg | true
-done
-
-for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'lingmo-update-ui' | sed -ne 's/^installed //p'); do
   apt-mark manual $pkg | true
 done
