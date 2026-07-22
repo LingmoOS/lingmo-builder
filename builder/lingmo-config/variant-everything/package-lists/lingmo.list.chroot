@@ -14,6 +14,11 @@ base-files
 appmotor
 liblingmo
 liblingmo-filemanager
+lingmo-appearance-common
+lingmo-appearance-decoration
+lingmo-appearance-qt6
+lingmo-appearance-settings
+lingmo-appearance
 lingmo-calculator
 lingmo-core
 lingmo-cursor-themes
@@ -23,6 +28,9 @@ lingmo-dock
 lingmo-filemanager
 lingmo-grub-config
 lingmo-gtk-themes
+lingmo-installer
+lingmo-installer-config
+lingmo-oobe
 lingmo-kwin-plugins-roundedwindow
 lingmo-launcher
 lingmo-qt-plugins
@@ -60,6 +68,11 @@ zsh-syntax-highlighting
 appmotor
 liblingmo
 liblingmo-filemanager
+lingmo-appearance-common
+lingmo-appearance-decoration
+lingmo-appearance-qt6
+lingmo-appearance-settings
+lingmo-appearance
 lingmo-calculator
 lingmo-core
 lingmo-cursor-themes
@@ -69,6 +82,9 @@ lingmo-dock
 lingmo-filemanager
 lingmo-grub-config
 lingmo-gtk-themes
+lingmo-installer
+lingmo-installer-config
+lingmo-oobe
 lingmo-kwin-plugins-roundedwindow
 lingmo-launcher
 lingmo-qt-plugins
