@@ -14,7 +14,7 @@ DefaultPath=/usr/bin:/bin
 
 [Autologin]
 User=liveuser
-Session=lingmo.desktop
+Session=lingmo-xsession.desktop
 
 [General]
 Numlock=on
