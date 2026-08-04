@@ -81,7 +81,7 @@ apt install -y \
     lingmo-terminal \
     lingmo-wallpapers \
     lingmo-watchdog \
-    lingmoui \
+    lingmoui3 \
     lingmo-plymouth \
     sddm \
     xorg
