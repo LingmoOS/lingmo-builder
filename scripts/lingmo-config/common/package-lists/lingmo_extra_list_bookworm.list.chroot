@@ -69,10 +69,6 @@ zstd
 frameworkintegration
 gdb-minimal
 iso-codes
-kactivitymanagerd
-kded5
-kinit
-kio
 kwin-common
 milou
 qml-module-qt-labs-folderlistmodel

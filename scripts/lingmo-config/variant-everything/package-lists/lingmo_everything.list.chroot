@@ -1,6 +1,5 @@
 # App Store
 packagekit-tools 
-plasma-discover
 qml-module-org-kde-purpose
 
 # Office
@@ -30,8 +29,8 @@ kwin-wayland
 ddm
 treeland
 treeland-wayland-session
-velora-desktop-theme
-deepin-gtk-theme
+lingmo-desktop-theme
+velora-gtk-theme
 lingmo-wallpapers
 deepin-settings-default
 deepin-settings-default-tuning

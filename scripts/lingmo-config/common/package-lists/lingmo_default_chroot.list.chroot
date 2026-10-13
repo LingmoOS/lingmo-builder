@@ -9,7 +9,6 @@ pciutils
 usbutils
 eject
 tasksel
-system-core
 
 #if ARCHITECTURES i386
 grub-pc
@@ -73,8 +72,8 @@ kwin-wayland
 ddm
 treeland
 treeland-wayland-session
-velora-desktop-theme
-deepin-gtk-theme
+lingmo-desktop-theme
+velora-gtk-theme
 lingmo-wallpapers
 deepin-settings-default
 deepin-settings-default-tuning
