@@ -1,0 +1,133 @@
+# ensure eatmydata is available for eatmydata.udeb
+eatmydata
+
+# ensure some packages installed by base-installer/post-base-installer.d/*
+# hooks are available
+sudo
+locales
+pciutils
+usbutils
+eject
+tasksel
+system-core
+
+#if ARCHITECTURES i386
+grub-pc
+#endif
+#if ARCHITECTURES amd64
+grub-pc
+#endif
+
+# For GRUB for EFI
+efibootmgr
+
+# Linux image
+linux-image-amd64
+
+# Live configs
+live-boot
+live-config
+lingmo-grub-config
+lingmo-installer-config
+
+# Filesystem tools
+dosfstools
+e2fsprogs
+ntfs-3g
+exfatprogs
+exfat-fuse
+xfsprogs
+btrfs-progs
+reiserfsprogs
+f2fs-tools
+jfsutils
+xfsprogs
+squashfs-tools
+
+# rsync tools
+rsync 
+
+# Disk Encryption
+cryptsetup
+
+# bluetooth
+bluez
+pulseaudio-module-bluetooth
+pulseaudio
+
+# WLAN
+hostapd
+wpagui
+wpasupplicant
+dbus
+
+# Package management
+packagekit
+
+# OpenSSH
+openssh-server
+
+# desktop
+kwin-x11
+kwin-wayland
+ddm
+treeland
+treeland-wayland-session
+velora-desktop-theme
+deepin-gtk-theme
+lingmo-wallpapers
+deepin-settings-default
+deepin-settings-default-tuning
+velora-desktop-environment-base
+velora-desktop-environment-core
+velora-desktop-environment-extras
+dde-appearance
+dde-application-manager-api
+dde-control-center
+dde-calendar
+dde-daemon
+dde-desktop
+dde-file-manager
+dde-qt5integration
+dde-qt5wayland-plugin
+dde-qt5xcb-plugin
+dde-qt6integration
+dde-qt6xcb-plugin
+dde-services
+dde-session
+dde-session-shell
+dde-session-ui
+dde-shell
+dde-wirelesscasting-plugin
+deepin-album
+deepin-app-store-runtime
+deepin-compressor
+deepin-deb-installer
+deepin-devicemanager
+deepin-diskmanager
+deepin-log-viewer
+deepin-network-displays
+deepin-pw-check
+deepin-screen-recorder
+deepin-settings-default
+deepin-service-manager
+deepin-service-plugin-network
+deepin-system-monitor
+deepin-terminal
+deepin-update-ui
+deepin-wayland-protocols
+dock-network-plugin
+dss-network-plugin
+lastore-daemon
+lingmo-kwin-x11
+lingmo-kwin-wayland
+lingmo-kwin-scripts
+lingmo-oobe
+lingmo-plymouth
+lingmo-theme-classic
+liblingmo-kwineffects14
+network-manager-integration-plugins
+velora-desktop-schemas
+wlr-protocols
+qml-module-qtquick-controls2-styles-chameleon
+qml6-module-qtquick-controls2-styles-chameleon

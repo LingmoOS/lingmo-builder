@@ -1,0 +1,163 @@
+# Live image
+# You always want these:
+# lingmo-linux-core
+# lingmo-desktop-live
+
+# Metapackages
+# You can customize the set of Lingmo metapackages (groups of tools) to install
+# For the complete list see: https://tools.lingmo.org/lingmo-metapackages
+
+# Core Packages
+base-files
+
+## linux-core
+ftp
+openssh-client
+openssh-server
+parted
+sudo
+tasksel
+tmux
+vim
+zsh
+zsh-autosuggestions
+zsh-syntax-highlighting
+
+kget
+pulseaudio
+elisa
+okular
+kfind
+kgpg
+krdc
+ktorrent
+mediainfo
+frei0r-plugins
+kdenlive
+
+# NOTE: We would like to provide lingmo-linux-large in our installer images
+# but we end up with ISO images that are too big for our CDN. So disable
+# it for now.
+# lingmo-linux-large
+
+# Graphical desktops
+lingmo-oobe
+liblingmo-filemanager
+sddm
+xorg
+kwin-x11
+
+# Live configs
+live-boot
+lingmo-installer-config
+gparted
+dirmngr
+kwin-x11
+kscreen
+sound-theme-freedesktop
+vim
+
+libqapt3-runtime
+
+plymouth
+
+# Lingmo applications
+chromium
+chromium-l10n
+gwenview
+
+# Input Methods
+fcitx5
+fcitx5-chinese-addons
+
+# CJK Fonts
+fonts-noto-cjk
+
+# firmware
+bluez-firmware
+firmware-amd-graphics
+firmware-ath9k-htc
+firmware-atheros
+firmware-bnx2x
+firmware-brcm80211
+firmware-cavium
+firmware-cirrus
+firmware-intel-graphics
+firmware-intel-misc
+firmware-intel-sound
+firmware-ipw2x00
+firmware-iwlwifi
+firmware-libertas
+firmware-linux
+firmware-misc-nonfree
+firmware-myricom
+firmware-netronome
+firmware-nvidia-graphics
+firmware-nvidia-gsp
+firmware-qcom-media
+firmware-realtek
+
+# desktop
+kwin-x11
+kwin-wayland
+ddm
+treeland
+treeland-wayland-session
+velora-desktop-theme
+deepin-gtk-theme
+lingmo-wallpapers
+deepin-settings-default
+deepin-settings-default-tuning
+velora-desktop-environment-base
+velora-desktop-environment-core
+velora-desktop-environment-extras
+dde-appearance
+dde-application-manager-api
+dde-control-center
+dde-calendar
+dde-daemon
+dde-desktop
+dde-file-manager
+dde-qt5integration
+dde-qt5wayland-plugin
+dde-qt5xcb-plugin
+dde-qt6integration
+dde-qt6xcb-plugin
+dde-services
+dde-session
+dde-session-shell
+dde-session-ui
+dde-shell
+dde-wirelesscasting-plugin
+deepin-album
+deepin-app-store-runtime
+deepin-compressor
+deepin-deb-installer
+deepin-devicemanager
+deepin-diskmanager
+deepin-log-viewer
+deepin-network-displays
+deepin-pw-check
+deepin-screen-recorder
+deepin-settings-default
+deepin-service-manager
+deepin-service-plugin-network
+deepin-system-monitor
+deepin-terminal
+deepin-update-ui
+deepin-wayland-protocols
+dock-network-plugin
+dss-network-plugin
+lastore-daemon
+lingmo-kwin-x11
+lingmo-kwin-wayland
+lingmo-kwin-scripts
+lingmo-oobe
+lingmo-plymouth
+lingmo-theme-classic
+liblingmo-kwineffects14
+network-manager-integration-plugins
+velora-desktop-schemas
+wlr-protocols
+qml-module-qtquick-controls2-styles-chameleon
+qml6-module-qtquick-controls2-styles-chameleon

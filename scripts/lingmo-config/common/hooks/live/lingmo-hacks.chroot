@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+DISTRO_NAME="Lingmo OS"
+VERSION="5.0"
+CODENAME="Lithium"
+BUILD_VER="26a01"
+DEBIAN_VER="13.7"
+VERSION_TYPE="development"
+VARIANT="Desktop"
+VARIANT_ID="desktop"
+
+BUILD_ID="$(date +%Y%m%d)"
+
+# Handle systems where /lib is not merged in /usr/lib
+if [ ! -h /lib ]; then
+  mv /usr/lib/live/config/* /lib/live/config/
+fi
+
+# Enable cryptsetup in the initramfs for later use if the user
+# adds an encrypted persistence partition.
+# This is until https://bugs.debian.org/908220 has a proper fix.
+if [ -e /etc/cryptsetup-initramfs/conf-hook ]; then
+  if grep -q '^#CRYPTSETUP=' /etc/cryptsetup-initramfs/conf-hook; then
+    sed -i -e 's/^#CRYPTSETUP=.*/CRYPTSETUP=y/' /etc/cryptsetup-initramfs/conf-hook
+  else
+    echo "CRYPTSETUP=y" >>/etc/cryptsetup-initramfs/conf-hook
+  fi
+fi
+
+# Rebuild the initramfs to include the last change
+update-initramfs -u
+
+# Run updatedb to initialize the database for the locate command
+if [ -x "$(which updatedb 2>/dev/null)" ]; then
+  updatedb
+fi
+
+# Mark kernel related packages on hold so that they are not upgraded in
+# the live system
+for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'linux-image-*' 'linux-headers-*' 'linux-kbuild-*' | sed -ne 's/^installed //p'); do
+  apt-mark hold $pkg | true
+done
+
+# Mark lingmo DE as manually installed
+for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'lingmo*' | sed -ne 's/^installed //p'); do
+  apt-mark manual $pkg | true
+done
+
+# Remove unwanted packages
+apt remove systemsettings -y | true
+apt remove plasma-desktop -y | true
+# apt remove network-manager-gnome konsole kde-baseapps -y | true
+apt remove zutty -y | true
+apt remove breeze eog -y | true
+apt remove xterm -y | true
+apt autoremove -y | true
+# apt update | true
+
+# Install OnlyOffice
+get_arch=$(arch)
+if [[ $get_arch =~ "x86_64" ]]; then
+  apt update
+  curl -o onlyoffice.deb https://download.onlyoffice.com/install/desktop/editors/linux/onlyoffice-desktopeditors_amd64.deb
+  apt install -y --no-install-recommends ./onlyoffice.deb
+  rm -rfv ./onlyoffice.deb
+fi
+
+chmod +x /bin/config-installer
+
+rm /usr/lib/os-release
+
+cat > /usr/lib/os-release <<EOF
+PRETTY_NAME="${DISTRO_NAME} ${VERSION} (${CODENAME})"
+NAME="${DISTRO_NAME}"
+VERSION_ID="${VERSION}"
+VERSION="${VERSION} (${CODENAME})"
+BUILD_VERSION="${BUILD_VER}"
+BUILD_ID="${BUILD_ID}"
+VERSION_TYPE="${VERSION_TYPE}"
+VERSION_CODENAME="${CODENAME}"
+DEBIAN_VERSION_FULL="${DEBIAN_VER}"
+ID=lingmo
+ID_LIKE=debian
+ANSI_COLOR="1;34"
+LOGO=lingmo
+CPE_NAME="cpe:2.3:o:lingmo:lingmo_os:${VERSION}:*:*:*:*:*:*:*"
+VARIANT="${VARIANT}"
+VARIANT_ID="${VARIANT_ID}"
+HOME_URL="https://lingmo.org/"
+SUPPORT_URL="https://lingmo.org/support"
+BUG_REPORT_URL="https://bugs.lingmo.org/"
+EOF
+
+rm /etc/os-release
+ln -sfn /usr/lib/os-release /etc/os-release
