@@ -67,7 +67,6 @@ zstd
 frameworkintegration
 gdb-minimal
 iso-codes
-kwin-common
 milou
 qml-module-qt-labs-folderlistmodel
 qml-module-qtgraphicaleffects

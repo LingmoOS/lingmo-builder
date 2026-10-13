@@ -105,8 +105,7 @@ treeland-wayland-session
 lingmo-desktop-theme
 velora-gtk-theme
 lingmo-wallpapers
-deepin-settings-default
-deepin-settings-default-tuning
+
 velora-desktop-environment-base
 velora-desktop-environment-core
 velora-desktop-environment-extras
@@ -138,7 +137,6 @@ deepin-log-viewer
 deepin-network-displays
 deepin-pw-check
 deepin-screen-recorder
-deepin-settings-default
 deepin-service-manager
 deepin-service-plugin-network
 deepin-system-monitor
