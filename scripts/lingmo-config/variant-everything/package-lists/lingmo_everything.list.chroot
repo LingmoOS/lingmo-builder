@@ -24,8 +24,6 @@ inkscape
 ark
 
 # desktop
-kwin-x11
-kwin-wayland
 ddm
 treeland
 treeland-wayland-session

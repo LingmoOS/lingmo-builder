@@ -97,8 +97,6 @@ firmware-qcom-media
 firmware-realtek
 
 # desktop
-kwin-x11
-kwin-wayland
 ddm
 treeland
 treeland-wayland-session
