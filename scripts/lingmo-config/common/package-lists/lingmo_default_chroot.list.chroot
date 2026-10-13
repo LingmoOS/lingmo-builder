@@ -26,7 +26,6 @@ linux-image-amd64
 # Live configs
 live-boot
 live-config
-lingmo-grub-config
 lingmo-installer-config
 
 # Filesystem tools
