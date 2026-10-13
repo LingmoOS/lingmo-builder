@@ -44,8 +44,6 @@ netpbm
 packagekit
 packagekit-tools
 
-qt5dxcb-plugin
-
 samba-libs
 
 shim-signed
