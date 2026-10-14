@@ -57,14 +57,16 @@ apt remove xterm -y | true
 apt autoremove -y | true
 # apt update | true
 
-# Install OnlyOffice
-get_arch=$(arch)
-if [[ $get_arch =~ "x86_64" ]]; then
-  apt update
-  curl -o onlyoffice.deb https://download.onlyoffice.com/install/desktop/editors/linux/onlyoffice-desktopeditors_amd64.deb
-  apt install -y --no-install-recommends ./onlyoffice.deb
-  rm -rfv ./onlyoffice.deb
-fi
+# Install OnlyOffice —— 已注释停用（2026-10-14）
+# 原因：装完后约 0.7~1 GB，明显推高 ISO 体积；且构建时要联网下载 deb，
+#       上游改版或网络抖动都会让 ISO 构建失败。需要恢复时取消下面注释即可。
+# get_arch=$(arch)
+# if [[ $get_arch =~ "x86_64" ]]; then
+#   apt update
+#   curl -o onlyoffice.deb https://download.onlyoffice.com/install/desktop/editors/linux/onlyoffice-desktopeditors_amd64.deb
+#   apt install -y --no-install-recommends ./onlyoffice.deb
+#   rm -rfv ./onlyoffice.deb
+# fi
 
 chmod +x /bin/config-installer
 
