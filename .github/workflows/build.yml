@@ -39,7 +39,6 @@ jobs:
           # 这一步在“安装系统依赖”之前，容器里可能还没有 python3
           command -v python3 >/dev/null 2>&1 || { apt-get update -qq && apt-get install -y -qq python3; }
           git clone --depth 1 https://github.com/LingmoOS/lingmo-version.git /tmp/lingmo-version
-          git clone --depth 1 https://github.com/LingmoOS/lingmo-version.git /tmp/lingmo-version
           git clone --depth 1 https://github.com/LingmoOS/base-files.git /tmp/base-files
           git clone --depth 1 https://github.com/LingmoOS/lingmo-live.git /tmp/lingmo-live
           python3 /tmp/lingmo-version/lingmo-version check \
