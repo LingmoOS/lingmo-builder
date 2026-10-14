@@ -150,6 +150,7 @@ lingmo-plymouth
 lingmo-theme-classic
 liblingmo-kwineffects14
 network-manager-integration-plugins
+sddm-theme-lingmo
 velora-desktop-schemas
 wlr-protocols
 qml-module-qtquick-controls2-styles-chameleon
