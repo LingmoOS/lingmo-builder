@@ -5,11 +5,12 @@ VERSION="5.0"
 CODENAME="Lithium"
 BUILD_VER="26a01"
 DEBIAN_VER="13.7"
-VERSION_TYPE="development"
+VERSION_TYPE="Alpha"
 VARIANT="Desktop"
 VARIANT_ID="desktop"
 
 BUILD_ID="$(date +%Y%m%d)"
+BUILD_TIME="261014204"
 
 # Handle systems where /lib is not merged in /usr/lib
 if [ ! -h /lib ]; then
@@ -76,6 +77,7 @@ VERSION_ID="${VERSION}"
 VERSION="${VERSION} (${CODENAME})"
 BUILD_VERSION="${BUILD_VER}"
 BUILD_ID="${BUILD_ID}"
+BUILD_TIME="${BUILD_TIME}"
 VERSION_TYPE="${VERSION_TYPE}"
 VERSION_CODENAME="${CODENAME}"
 DEBIAN_VERSION_FULL="${DEBIAN_VER}"
