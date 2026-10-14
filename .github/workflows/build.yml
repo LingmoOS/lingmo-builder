@@ -32,6 +32,15 @@ jobs:
         with:
           fetch-depth: 1
 
+      # 版本号一致性门禁：与 base-files 比对（不一致则失败）
+      - name: Check system version consistency
+        run: |
+          set -e
+          git clone --depth 1 https://github.com/LingmoOS/lingmo-version.git /tmp/lingmo-version
+          git clone --depth 1 https://github.com/LingmoOS/base-files.git /tmp/base-files
+          python3 /tmp/lingmo-version/lingmo-version check \
+              --base-files /tmp/base-files --builder "$PWD"
+
       - name: Install system dependencies
         run: |
           apt-get update
