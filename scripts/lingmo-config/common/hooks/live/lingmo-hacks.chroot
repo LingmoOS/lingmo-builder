@@ -102,3 +102,8 @@ ln -sfn /usr/lib/os-release /etc/os-release
 # built on the first boot and ldconfig.service alone took 11.5s there
 # (measured on the live image).
 ldconfig 2>/dev/null || true
+
+# Recompile the GSettings schemas so the Lingmo defaults shipped in
+# /usr/share/glib-2.0/schemas/99-lingmo-defaults.gschema.override take effect
+# (icon theme). Without this the image keeps the pre-override defaults.
+glib-compile-schemas /usr/share/glib-2.0/schemas 2>/dev/null || true
