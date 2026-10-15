@@ -107,3 +107,17 @@ ldconfig 2>/dev/null || true
 # /usr/share/glib-2.0/schemas/99-lingmo-defaults.gschema.override take effect
 # (icon theme). Without this the image keeps the pre-override defaults.
 glib-compile-schemas /usr/share/glib-2.0/schemas 2>/dev/null || true
+
+# dtkcore（OS_VERSION_FILE）、系统监视器、设备管理器读的都是 /etc/os-version。
+# 软件包生成的那份只能用包内已知信息（没有构建号），所以这里按 os-release 重新
+# 生成，保证 SystemName/MajorVersion/OsBuild 与系统版本完全一致（单一来源）。
+cat > /etc/os-version <<EOF
+[Version]
+SystemName=${DISTRO_NAME}
+ProductType=Desktop
+EditionName=
+MajorVersion=${VERSION}
+MinorVersion=${VERSION}
+OsBuild=${BUILD_VER}
+EOF
+chmod 644 /etc/os-version
