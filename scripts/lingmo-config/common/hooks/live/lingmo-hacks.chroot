@@ -97,3 +97,8 @@ EOF
 
 rm /etc/os-release
 ln -sfn /usr/lib/os-release /etc/os-release
+
+# Warm the dynamic linker cache at build time. Without this the cache is
+# built on the first boot and ldconfig.service alone took 11.5s there
+# (measured on the live image).
+ldconfig 2>/dev/null || true
