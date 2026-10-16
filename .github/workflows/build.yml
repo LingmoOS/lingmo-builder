@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: ["main"]
   workflow_dispatch:
+    inputs:
+      release:
+        description: "构建完成后发布为 GitHub Release"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -112,18 +117,19 @@ jobs:
 
       - name: Generate version tag
         id: version
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.release)
         run: |
           . tools/build_version_2.sh
           TAG="lingmo-os-$(generate_build_ver)"
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
       - name: Publish to GitHub Release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.version.outputs.tag != ''
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' && inputs.release) && steps.version.outputs.tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${{ steps.version.outputs.tag }}"
+          REPO="${{ github.repository }}"
           ARCHIVE=$(ls -1 artifact/*.iso 2>/dev/null | head -1)
 
           if [ -z "${ARCHIVE}" ]; then
@@ -136,35 +142,36 @@ jobs:
           SIZE=$(stat -c%s "${ARCHIVE}")
           echo "文件大小: ${SIZE} bytes"
 
-          # GitHub Release 单个文件限制 2GB，超过则分片上传
-          if [ "${SIZE}" -gt 2147483648 ]; then
-            echo "文件超过 2GB，创建 Release 后分片上传"
-            gh release create "${TAG}" \
-              --repo "${{ github.repository }}" \
-              --title "Build ${TAG}" \
-              --notes "自动构建的 Lingmo OS ISO" \
-              --target "${{ github.ref_name }}" \
-              --latest=false
-
-            split -b 1900M "${ARCHIVE}" "${ARCHIVE}.part-"
-            for part in "${ARCHIVE}".part-*; do
-              echo "上传分片: $(basename "${part}") ($(du -h "${part}" | cut -f1))"
-              gh release upload "${TAG}" "${part}" \
-                --repo "${{ github.repository }}" \
-                --clobber
-            done
-
-            echo "清理分片文件"
-            rm -f "${ARCHIVE}".part-*
+          # 同一版本重复构建时 tag 已存在：改为覆盖上传，避免 gh release create 失败
+          if gh release view "${TAG}" --repo "${REPO}" >/dev/null 2>&1; then
+            echo "Release ${TAG} 已存在，覆盖其中的 ISO"
           else
-            echo "创建 Release（含文件）: ${TAG}"
+            echo "创建 Release: ${TAG}"
             gh release create "${TAG}" \
-              "${ARCHIVE}" \
-              --repo "${{ github.repository }}" \
+              --repo "${REPO}" \
               --title "Build ${TAG}" \
               --notes "自动构建的 Lingmo OS ISO" \
               --target "${{ github.ref_name }}" \
               --latest=false
           fi
 
-          echo "Release ${TAG} 创建完成"
+          # GitHub Release 单个文件限制 2GiB，超过则分片上传
+          if [ "${SIZE}" -gt 2147483648 ]; then
+            echo "文件超过 2GiB，分片上传"
+            split -b 1900M "${ARCHIVE}" "${ARCHIVE}.part-"
+            for part in "${ARCHIVE}".part-*; do
+              echo "上传分片: $(basename "${part}") ($(du -h "${part}" | cut -f1))"
+              gh release upload "${TAG}" "${part}" \
+                --repo "${REPO}" \
+                --clobber
+            done
+            echo "清理分片文件"
+            rm -f "${ARCHIVE}".part-*
+          else
+            echo "上传 ISO 到 Release"
+            gh release upload "${TAG}" "${ARCHIVE}" \
+              --repo "${REPO}" \
+              --clobber
+          fi
+
+          echo "Release ${TAG} 完成"
