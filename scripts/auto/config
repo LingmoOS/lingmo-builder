@@ -150,7 +150,7 @@ lb config noauto \
 	--debootstrap-options "--keyring=/usr/share/keyrings/debian-archive-keyring.gpg" \
 	--keyring-packages "debian-archive-keyring" \
 	--apt-recommends false \
-	--apt-options "-o DPkg::Options::=\"--force-confnew\" -y" --option Acquire::Retries=5 --option Acquire::http::Timeout=30 \
+	--apt-options "-o DPkg::Options::=\"--force-confnew\" -y --option Acquire::Retries=5 --option Acquire::http::Timeout=30" \
 	--updates true \
 	--backports false \
 	--source false \
