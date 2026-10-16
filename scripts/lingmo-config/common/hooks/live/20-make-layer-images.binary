@@ -125,12 +125,14 @@ chroot_files=$(find "${CHROOT}" -xdev -type f 2>/dev/null | wc -l)
 layered_files=0
 for L in ${ORDER}; do
     pf="${WORK}/L-${L}.paths"; df="${WORK}/L-${L}.dirs"
-    [ -s "$pf" ] || { echo "I: 层 ${L} 无内容，跳过"; continue; }
     d="${WORK}/${L}"; mkdir -p "$d"
+    if [ ! -s "$pf" ]; then
+        echo "I: 层 ${L} 无内容（仍生成空层：保证层集合恒定，Calamares 的列表无需随映射变化）"
+    fi
 
     [ -s "$df" ] && sort -zu "$df" | xargs -0 -r mkdir -p --
     # 先尝试硬链接（省空间、快）；跨文件系统会整批失败 ⇒ 回退为复制
-    ( cd "${CHROOT}" && xargs -0 -r cp -dl --parents -t "$d" < "$pf" ) 2>"${WORK}/${L}.err" || true
+    [ -s "$pf" ] && { ( cd "${CHROOT}" && xargs -0 -r cp -dl --parents -t "$d" < "$pf" ) 2>"${WORK}/${L}.err" || true; }
     if grep -qE 'cross-device|not permitted' "${WORK}/${L}.err" 2>/dev/null; then
         echo "W: 层 ${L} 硬链接跨文件系统失败 ⇒ 回退为复制（会慢一些、更占空间）"
         ( cd "${CHROOT}" && xargs -0 -r cp -d --preserve=all --parents -t "$d" < "$pf" ) 2>"${WORK}/${L}.err" || true
@@ -141,7 +143,7 @@ for L in ${ORDER}; do
     fi
 
     cnt=$(find "$d" -type f 2>/dev/null | wc -l)
-    if [ "$cnt" -eq 0 ]; then
+    if [ -s "$pf" ] && [ "$cnt" -eq 0 ]; then
         echo "E: 层 ${L} 的路径列表非空（$(wc -l < "$pf") 条）却一个文件都没拷进来，切分失败 ⇒ 中止" >&2
         head -5 "${WORK}/${L}.err" | sed 's/^/     /' >&2
         exit 1
