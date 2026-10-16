@@ -150,7 +150,7 @@ lb config noauto \
 	--debootstrap-options "--keyring=/usr/share/keyrings/debian-archive-keyring.gpg" \
 	--keyring-packages "debian-archive-keyring" \
 	--apt-recommends false \
-	--apt-options "-o DPkg::Options::=\"--force-confnew\" -y" \
+	--apt-options "-o DPkg::Options::=\"--force-confnew\" -y" --option Acquire::Retries=5 --option Acquire::http::Timeout=30 \
 	--updates true \
 	--backports false \
 	--source false \
@@ -173,7 +173,6 @@ lb config noauto \
 #         apt 刷 'Tried to start delayed item ... but failed'），并加下载重试
 	--mirror-chroot-security "http://deb.debian.org/debian-security" \
 	--mirror-binary-security "http://deb.debian.org/debian-security" \
-	--apt-options "--yes --option Acquire::Retries=5 --option Acquire::http::Timeout=30" \
 	--bootappend-live-failsafe "boot=live components noeject memtest noapic noapm nodma nomce nolapic nomodeset nosmp nosplash vga=normal" \
 	--bootappend-install "net.ifnames=0" \
 	--debootstrap-options "--include=apt-transport-https,ca-certificates,openssl" \
