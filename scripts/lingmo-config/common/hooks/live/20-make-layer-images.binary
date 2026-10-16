@@ -88,7 +88,7 @@ echo "I: 目录 $(wc -l < "${WORK}/dirs") 个 ⇒ 由 mkdir -p 创建"
 find "${CHROOT}" -xdev \( -path "${CHROOT}/proc" -o -path "${CHROOT}/sys" \
      -o -path "${CHROOT}/dev"  -o -path "${CHROOT}/run" \
      -o -path "${CHROOT}/mnt"  -o -path "${CHROOT}/media" \) -prune -o \
-     \( -type f -o -type l \) -printf '/%P\n' 2>/dev/null | LC_ALL=C sort -u > "${WORK}/allfiles"
+     \( -type f -o -type l \) -printf '%P\n' 2>/dev/null | LC_ALL=C sort -u > "${WORK}/allfiles"
 cut -f2 "${WORK}/paths.raw" | LC_ALL=C sort -u > "${WORK}/covered"
 # 注意：sort 与 comm 必须用同一 collation（都加 LC_ALL=C），否则 comm 会报
 #       "file 1 is not in sorted order" 并给出错误结果
