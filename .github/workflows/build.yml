@@ -65,6 +65,22 @@ jobs:
           apt-get update
           apt-get install -y gh
 
+      # Lingmo 定制的 live-build（支持 LB_LIVE_DIR 改介质目录名）；版本高于 Debian 的会自动胜出
+      - name: Use Lingmo live-build
+        run: |
+          set -e
+          echo "deb https://download.opensuse.org/repositories/home:/LingmoOS/Debian_13/ /" \
+            > /etc/apt/sources.list.d/lingmo-obs.list
+          curl -fsSL https://download.opensuse.org/repositories/home:/LingmoOS/Debian_13/Release.key \
+            | gpg --dearmor -o /etc/apt/trusted.gpg.d/lingmo-obs.gpg
+          apt-get update
+          apt-get install -y --allow-downgrades live-build
+          echo "=== 实际使用的 live-build ==="
+          dpkg-query -W -f='${Package} ${Version}\n' live-build
+          # 断言：必须是 Lingmo 定制版，否则后面 LB_LIVE_DIR 不生效
+          dpkg-query -W -f='${Version}' live-build | grep -q '+lingmo' \
+            || { echo "ERROR: live-build 不是 Lingmo 定制版" >&2; exit 1; }
+
       - name: Free up disk space
         run: |
           echo "=== Disk space before cleanup ==="

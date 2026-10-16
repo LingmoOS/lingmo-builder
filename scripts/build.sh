@@ -253,6 +253,14 @@ fi
 
 # Build parameters for lb config
 LINGMO_CONFIG_OPTS="--distribution $LINGMO_DIST -- --variant $LINGMO_VARIANT"
+
+# Lingmo：介质内目录名（live-build 侧读 LB_LIVE_DIR；默认 live）
+# 注意 live-boot 侧要配套 live-media-path=${LB_LIVE_DIR}（见 auto/config 的 --bootappend-live）
+export LB_LIVE_DIR="${LB_LIVE_DIR:-core.lm}"
+# 分层根文件系统（多 *.img）暂不开启；开启需同时改 Calamares 的 unpackfs
+export LINGMO_LAYERED_ROOTFS="${LINGMO_LAYERED_ROOTFS:-no}"
+export LINGMO_LAYER_MODULE="${LINGMO_LAYER_MODULE:-core}"
+
 CODENAME=$LINGMO_DIST # for simple-cdd/debian-cd
 if [ -n "$OPT_pu" ]; then
   LINGMO_CONFIG_OPTS="$LINGMO_CONFIG_OPTS --proposed-updates"
