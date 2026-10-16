@@ -1,5 +1,0 @@
-Lingmo OS @VERSION@ (@CODENAME@)
-Build: @BUILD_VER@ (@VERSION_TYPE@)
-Type: @VARIANT@
-Debian Base: @DEBIAN_VER@
-Architecture: @ARCH@
