@@ -103,11 +103,14 @@ awk -F'\t' -v work="${WORK}" '
   BEGIN {
     while ((getline s < (work "/symlinks")) > 0) sym["/" s] = 1
     while ((getline d < (work "/dirs"))     > 0) dir["/" d] = 1
+    while ((getline a < (work "/allfiles")) > 0) exist["/" a] = 1   # 只有真实存在的路径才建层
     np = 0
-    while ((getline r < (work "/pathrules")) > 0) { split(r, a, "|"); pat[++np] = a[1]; lay[np] = a[2] }
+    while ((getline r < (work "/pathrules")) > 0) { split(r, a2, "|"); pat[++np] = a2[1]; lay[np] = a2[2] }
   }
   {
     p = $2
+    if (p == "/" || p == "/." ) next
+    if (!(p in exist) && !(p in dir)) next        # dpkg 清单里已不存在的文件（被 hook 删过/rc 状态）
     if (p in sym) tgt = "misc"
     else {
       tgt = ""
@@ -121,7 +124,7 @@ awk -F'\t' -v work="${WORK}" '
 
 # ── 5) 每层：建目录 + 批量硬链接 + mksquashfs ───────────────────
 : > "${WORK}/layers.list"
-chroot_files=$(find "${CHROOT}" -xdev -type f 2>/dev/null | wc -l)
+chroot_files=$(find "${CHROOT}" -xdev -type f 2>/dev/null | wc -l)   # 仅作量级参考
 layered_files=0
 for L in ${ORDER}; do
     pf="${WORK}/L-${L}.paths"; df="${WORK}/L-${L}.dirs"
@@ -132,9 +135,11 @@ for L in ${ORDER}; do
 
     [ -s "$df" ] && sort -zu "$df" | xargs -0 -r mkdir -p --
     # 先尝试硬链接（省空间、快）；跨文件系统会整批失败 ⇒ 回退为复制
-    [ -s "$pf" ] && { ( cd "${CHROOT}" && xargs -0 -r cp -dl --parents -t "$d" < "$pf" ) 2>"${WORK}/${L}.err" || true; }
-    if grep -qE 'cross-device|not permitted' "${WORK}/${L}.err" 2>/dev/null; then
-        echo "W: 层 ${L} 硬链接跨文件系统失败 ⇒ 回退为复制（会慢一些、更占空间）"
+    [ -s "$pf" ] && { ( cd "${CHROOT}" && xargs -0 -r cp -dl --parents -t "$d" < "$pf" ) 2>"${WORK}/${L}.link.err" || true; }
+    if grep -qE 'cross-device|not permitted' "${WORK}/${L}.link.err" 2>/dev/null; then
+        echo "W: 层 ${L} 硬链接失败 ⇒ 回退为复制（慢、且占额外空间）"
+        echo "W:   硬链接失败真因（前 3 行）："
+        head -3 "${WORK}/${L}.link.err" | sed 's/^/       /' 
         ( cd "${CHROOT}" && xargs -0 -r cp -d --preserve=all --parents -t "$d" < "$pf" ) 2>"${WORK}/${L}.err" || true
     fi
     if [ -s "${WORK}/${L}.err" ]; then
@@ -142,14 +147,18 @@ for L in ${ORDER}; do
         head -3 "${WORK}/${L}.err" | sed 's/^/     /'
     fi
 
-    cnt=$(find "$d" -type f 2>/dev/null | wc -l)
-    if [ -s "$pf" ] && [ "$cnt" -eq 0 ]; then
-        echo "E: 层 ${L} 的路径列表非空（$(wc -l < "$pf") 条）却一个文件都没拷进来，切分失败 ⇒ 中止" >&2
+    nlist=$(tr '\0' '\n' < "$pf" 2>/dev/null | grep -c . || true)
+    cnt=$(find "$d" -mindepth 1 ! -type d 2>/dev/null | wc -l)      # 文件 + 符号链接（不含目录）
+    nf=$(find "$d" -type f 2>/dev/null | wc -l)
+    nl=$(find "$d" -type l 2>/dev/null | wc -l)
+    nd=$(find "$d" -mindepth 1 -type d 2>/dev/null | wc -l)
+    if [ "$nlist" -gt 0 ] && [ "$cnt" -eq 0 ]; then
+        echo "E: 层 ${L} 列了 ${nlist} 条路径却一条都没建出来，切分失败 ⇒ 中止" >&2
         head -5 "${WORK}/${L}.err" | sed 's/^/     /' >&2
         exit 1
     fi
     layered_files=$((layered_files + cnt))
-    echo "I: 生成 ${L}.img（文件 ${cnt}，$(du -sh "$d" | cut -f1)）"
+    echo "I: 生成 ${L}.img（清单 ${nlist} 条 → 文件 ${nf} + 符号链接 ${nl} + 目录 ${nd}，$(du -sh "$d" | cut -f1)）"
     mksquashfs "$d" "${DEST}/${L}.img" -comp xz -no-progress -noappend > /dev/null
     echo "${L}.img" >> "${WORK}/layers.list"
 done
