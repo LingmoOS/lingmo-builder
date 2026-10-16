@@ -25,7 +25,7 @@ fi
 
 LIVE_DIR="${LB_LIVE_DIR:-live}"                 # 例：core.lm
 MODULE="${LINGMO_LAYER_MODULE:-core}"           # 例：core ⇒ core.module
-ORDER="system vendor device kernel boot misc"   # 前 → 后 = 优先级 低 → 高
+ORDER="system firmware kernel desktop lingmo apps vendor device misc"   # 前 → 后 = 优先级 低 → 高
 
 BINDIR="$(pwd)"                                 # binary/
 DEST="${BINDIR}/${LIVE_DIR}"
