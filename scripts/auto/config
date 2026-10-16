@@ -171,7 +171,7 @@ lb config noauto \
 	--mirror-chroot-security "http://deb.debian.org/debian-security" \
 	--mirror-binary-security "http://deb.debian.org/debian-security" \
 	--bootappend-live "boot=live components quiet splash noeject live-media-path=${LB_LIVE_DIR:-live} module=${LINGMO_LAYER_MODULE:-core}" \
-
+ \
 	--bootappend-live-failsafe "boot=live components noeject memtest noapic noapm nodma nomce nolapic nomodeset nosmp nosplash vga=normal" \
 	--bootappend-install "net.ifnames=0" \
 	--debootstrap-options "--include=apt-transport-https,ca-certificates,openssl" \
