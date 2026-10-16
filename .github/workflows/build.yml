@@ -65,7 +65,9 @@ jobs:
           apt-get update
           apt-get install -y gh
 
-      # Lingmo 定制的 live-build（支持 LB_LIVE_DIR 改介质目录名）；版本高于 Debian 的会自动胜出
+      # Lingmo 定制的 live-build（支持 LB_LIVE_DIR 改介质目录名）
+      # ⚠️ 构建容器是 debian:testing(sid)，其 live-build(1:20250814) 版本**高于**我们
+      #    trixie 分支的 1:20250505+deb13u1+lingmo1，所以只靠版本号赢不了 ⇒ 必须 apt pin。
       - name: Use Lingmo live-build
         run: |
           set -e
@@ -73,13 +75,18 @@ jobs:
             > /etc/apt/sources.list.d/lingmo-obs.list
           curl -fsSL https://download.opensuse.org/repositories/home:/LingmoOS/Debian_13/Release.key \
             | gpg --dearmor -o /etc/apt/trusted.gpg.d/lingmo-obs.gpg
+          cat > /etc/apt/preferences.d/lingmo-live-build <<'EOF'
+          Package: live-build
+          Pin: origin download.opensuse.org
+          Pin-Priority: 1001
+          EOF
           apt-get update
           apt-get install -y --allow-downgrades live-build
           echo "=== 实际使用的 live-build ==="
           dpkg-query -W -f='${Package} ${Version}\n' live-build
-          # 断言：必须是 Lingmo 定制版，否则后面 LB_LIVE_DIR 不生效
+          # 断言：必须是 Lingmo 定制版，否则后面 LB_LIVE_DIR 不生效、ISO 会找不到介质
           dpkg-query -W -f='${Version}' live-build | grep -q '+lingmo' \
-            || { echo "ERROR: live-build 不是 Lingmo 定制版" >&2; exit 1; }
+            || { echo "ERROR: live-build 不是 Lingmo 定制版（pin 未生效？）" >&2; exit 1; }
 
       - name: Free up disk space
         run: |
