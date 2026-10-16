@@ -71,24 +71,38 @@ echo "I: 包数 $(wc -l < "${WORK}/pkgs")，路径条目 $(wc -l < "${WORK}/path
 
 # ── 3) 符号链接集合（一次 find；不跨 /proc 等挂载） ─────────────
 find "${CHROOT}" -xdev \( -path "${CHROOT}/proc" -o -path "${CHROOT}/sys" \
-     -o -path "${CHROOT}/dev"  -o -path "${CHROOT}/run" \) -prune -o \
+     -o -path "${CHROOT}/dev"  -o -path "${CHROOT}/run" \
+     -o -path "${CHROOT}/mnt"  -o -path "${CHROOT}/media" \) -prune -o \
      -type l -printf '%P\n' 2>/dev/null | LC_ALL=C sort -u > "${WORK}/symlinks"
 echo "I: 符号链接 $(wc -l < "${WORK}/symlinks") 个 ⇒ 全部进 misc"
+
+# 目录集合：目录必须用 mkdir -p 创建（不能交给 cp，cp 会报 "-r not specified" 并跳过）
+find "${CHROOT}" -xdev \( -path "${CHROOT}/proc" -o -path "${CHROOT}/sys" \
+     -o -path "${CHROOT}/dev"  -o -path "${CHROOT}/run" \
+     -o -path "${CHROOT}/mnt"  -o -path "${CHROOT}/media" \) -prune -o \
+     -type d -printf '%P\n' 2>/dev/null | LC_ALL=C sort -u > "${WORK}/dirs"
+echo "I: 目录 $(wc -l < "${WORK}/dirs") 个 ⇒ 由 mkdir -p 创建"
 
 # ── 3b) 漏网文件兜底：chroot 里不在任何包清单中的文件 ─────────────
 #      （hook 生成的 /etc/os-version、update-initramfs 产物等都必须进层，否则 ISO 会缺文件）
 find "${CHROOT}" -xdev \( -path "${CHROOT}/proc" -o -path "${CHROOT}/sys" \
-     -o -path "${CHROOT}/dev"  -o -path "${CHROOT}/run" \) -prune -o \
+     -o -path "${CHROOT}/dev"  -o -path "${CHROOT}/run" \
+     -o -path "${CHROOT}/mnt"  -o -path "${CHROOT}/media" \) -prune -o \
      \( -type f -o -type l \) -printf '/%P\n' 2>/dev/null | LC_ALL=C sort -u > "${WORK}/allfiles"
 cut -f2 "${WORK}/paths.raw" | LC_ALL=C sort -u > "${WORK}/covered"
-comm -13 "${WORK}/covered" "${WORK}/allfiles" | awk '{print "system\t" $0}' > "${WORK}/leftovers.raw"
+# 注意：sort 与 comm 必须用同一 collation（都加 LC_ALL=C），否则 comm 会报
+#       "file 1 is not in sorted order" 并给出错误结果
+LC_ALL=C comm -13 "${WORK}/covered" "${WORK}/allfiles" | awk '{print "system\t" $0}' > "${WORK}/leftovers.raw"
 echo "I: 非包所有文件（hook 产物等）$(wc -l < "${WORK}/leftovers.raw") 个 ⇒ 兜底进 system（符号链接仍进 misc）"
 cat "${WORK}/leftovers.raw" >> "${WORK}/paths.raw"
 
-# ── 4) 一次 awk 分类 → 每层 NUL 分隔的 .paths 与已带前缀的 .dirs ─
+# ── 4) 一次 awk 分类 ────────────────────────────────────────────
+#     目录 → L-<层>.dirs（值已带 ${WORK}/<层> 前缀，可直接 mkdir -p）
+#     文件/符号链接 → L-<层>.paths（NUL 分隔，交给 cp -dl --parents）
 awk -F'\t' -v work="${WORK}" '
   BEGIN {
     while ((getline s < (work "/symlinks")) > 0) sym["/" s] = 1
+    while ((getline d < (work "/dirs"))     > 0) dir["/" d] = 1
     np = 0
     while ((getline r < (work "/pathrules")) > 0) { split(r, a, "|"); pat[++np] = a[1]; lay[np] = a[2] }
   }
@@ -100,9 +114,8 @@ awk -F'\t' -v work="${WORK}" '
       for (i = 1; i <= np; i++) if (index(p, pat[i]) == 1) { tgt = lay[i]; break }
       if (tgt == "") tgt = $1
     }
-    printf "%s%c", p, 0 > (work "/L-" tgt ".paths")
-    n = split(p, seg, "/"); cur = ""
-    for (i = 2; i < n; i++) { cur = cur "/" seg[i]; printf "%s%c", (work "/" tgt cur), 0 > (work "/L-" tgt ".dirs") }
+    if (p in dir) printf "%s%c", (work "/" tgt p), 0 > (work "/L-" tgt ".dirs")
+    else          printf "%s%c", p,                0 > (work "/L-" tgt ".paths")
   }
 ' "${WORK}/paths.raw"
 
@@ -116,12 +129,23 @@ for L in ${ORDER}; do
     d="${WORK}/${L}"; mkdir -p "$d"
 
     [ -s "$df" ] && sort -zu "$df" | xargs -0 -r mkdir -p --
+    # 先尝试硬链接（省空间、快）；跨文件系统会整批失败 ⇒ 回退为复制
     ( cd "${CHROOT}" && xargs -0 -r cp -dl --parents -t "$d" < "$pf" ) 2>"${WORK}/${L}.err" || true
+    if grep -qE 'cross-device|not permitted' "${WORK}/${L}.err" 2>/dev/null; then
+        echo "W: 层 ${L} 硬链接跨文件系统失败 ⇒ 回退为复制（会慢一些、更占空间）"
+        ( cd "${CHROOT}" && xargs -0 -r cp -d --preserve=all --parents -t "$d" < "$pf" ) 2>"${WORK}/${L}.err" || true
+    fi
     if [ -s "${WORK}/${L}.err" ]; then
-        echo "W: 层 ${L} 有 $(grep -c . "${WORK}/${L}.err") 行拷贝告警（多为 dpkg 清单里已不存在的文件，非致命）"
+        echo "W: 层 ${L} 有 $(grep -c . "${WORK}/${L}.err") 行拷贝告警（前 3 行如下；多为 dpkg 清单里已不存在的文件）"
+        head -3 "${WORK}/${L}.err" | sed 's/^/     /'
     fi
 
     cnt=$(find "$d" -type f 2>/dev/null | wc -l)
+    if [ "$cnt" -eq 0 ]; then
+        echo "E: 层 ${L} 的路径列表非空（$(wc -l < "$pf") 条）却一个文件都没拷进来，切分失败 ⇒ 中止" >&2
+        head -5 "${WORK}/${L}.err" | sed 's/^/     /' >&2
+        exit 1
+    fi
     layered_files=$((layered_files + cnt))
     echo "I: 生成 ${L}.img（文件 ${cnt}，$(du -sh "$d" | cut -f1)）"
     mksquashfs "$d" "${DEST}/${L}.img" -comp xz -no-progress -noappend > /dev/null
@@ -132,8 +156,12 @@ done
 
 # ── 5b) 安全阀：层内文件数不应远少于 chroot ─────────────────────
 echo "I: 层内文件合计 ${layered_files} / chroot ${chroot_files}"
+if [ "${layered_files}" -le 0 ]; then
+    echo "E: 层内一个文件都没有，切分失败 ⇒ 中止（保留原 filesystem.squashfs）" >&2
+    exit 1
+fi
 if [ "${chroot_files}" -gt 0 ] && [ "${layered_files}" -lt $(( chroot_files / 2 )) ]; then
-    echo "E: 层内文件数不足 chroot 的一半，切分明显异常 ⇒ 中止（保留原 filesystem.squashfs）" >&2
+    echo "E: 层内文件数不足 chroot 的一半（${layered_files} < $(( chroot_files / 2 ))）⇒ 切分异常，中止（保留原 filesystem.squashfs）" >&2
     exit 1
 fi
 
