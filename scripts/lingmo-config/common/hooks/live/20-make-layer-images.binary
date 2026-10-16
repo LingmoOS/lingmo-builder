@@ -135,13 +135,18 @@ for L in ${ORDER}; do
 
     [ -s "$df" ] && sort -zu "$df" | xargs -0 -r mkdir -p --
     # 先尝试硬链接（省空间、快）；跨文件系统会整批失败 ⇒ 回退为复制
-    [ -s "$pf" ] && { ( cd "${CHROOT}" && xargs -0 -r cp -dl --parents -t "$d" < "$pf" ) 2>"${WORK}/${L}.link.err" || true; }
-    if grep -qE 'cross-device|not permitted' "${WORK}/${L}.link.err" 2>/dev/null; then
-        echo "W: 层 ${L} 硬链接失败 ⇒ 回退为复制（慢、且占额外空间）"
-        echo "W:   硬链接失败真因（前 3 行）："
-        head -3 "${WORK}/${L}.link.err" | sed 's/^/       /' 
-        ( cd "${CHROOT}" && xargs -0 -r cp -d --preserve=all --parents -t "$d" < "$pf" ) 2>"${WORK}/${L}.err" || true
+    [ -s "$pf" ] && { ( cd "${CHROOT}" && xargs -0 -r cp -dl --parents -t "$d" < "$pf" ) 2>"${WORK}/${L}.err" || true; }
+
+    # ⭐ 按文件精准回退：硬链接失败通常是 chroot 里被 bind-mount 的少数文件（跨设备），
+    #    绝不能因此把整层重新复制一遍（27G rootfs 会又慢又爆盘）。
+    sed -n "s/^cp: cannot create hard link .* to '\(.*\)': .*/\1/p" "${WORK}/${L}.err" 2>/dev/null \
+        | LC_ALL=C sort -u | tr '\n' '\0' > "${WORK}/${L}.failed"
+    if [ -s "${WORK}/${L}.failed" ]; then
+        nlinkfail=$(tr -cd '\0' < "${WORK}/${L}.failed" | wc -c)
+        echo "W: 层 ${L} 有 ${nlinkfail} 个文件无法硬链接（多为 chroot 内 bind-mount 的跨设备文件）⇒ 仅对这些复制补齐"
+        ( cd "${CHROOT}" && xargs -0 -r cp -d --preserve=all --parents -t "$d" < "${WORK}/${L}.failed" ) 2>>"${WORK}/${L}.err" || true
     fi
+
     if [ -s "${WORK}/${L}.err" ]; then
         echo "W: 层 ${L} 有 $(grep -c . "${WORK}/${L}.err") 行拷贝告警（前 3 行如下；多为 dpkg 清单里已不存在的文件）"
         head -3 "${WORK}/${L}.err" | sed 's/^/     /'
