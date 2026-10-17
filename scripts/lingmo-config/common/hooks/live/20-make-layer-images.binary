@@ -127,6 +127,21 @@ awk -F'\t' -v work="${WORK}" '
   }
 ' "${WORK}/paths.raw"
 
+# ── 4b) FHS 骨架：保证必需目录进入 system 层 ─────────────────────
+#  上面三处 find 都 -prune 了 /dev /proc /sys /run /mnt /media（避免把挂载内容打进镜像），
+#  但这些**目录本身**必须存在：否则合并后的 rootfs 缺 /dev 等目录，
+#  initramfs 执行 mount --move /dev /root/dev 会失败 ⇒ init 死亡 ⇒ kernel panic。
+FHS_DIRS="dev proc sys run tmp root home srv opt mnt media etc var usr boot"
+for D in ${FHS_DIRS}; do
+    if [ -d "${CHROOT}/${D}" ]; then
+        mkdir -p "${WORK}/system/${D}"
+        chmod --reference="${CHROOT}/${D}" "${WORK}/system/${D}" 2>/dev/null || true
+        printf '%s\0' "${WORK}/system/${D}" >> "${WORK}/L-system.dirs"
+    fi
+done
+chmod 1777 "${WORK}/system/tmp" 2>/dev/null || true
+echo "I: 已补全 FHS 骨架目录（dev proc sys run tmp root home srv opt mnt media …）"
+
 # ── 5) 每层：建目录 + 批量硬链接 + mksquashfs ───────────────────
 : > "${WORK}/layers.list"
 chroot_files=$(find "${CHROOT}" -xdev -type f 2>/dev/null | wc -l)   # 仅作量级参考
