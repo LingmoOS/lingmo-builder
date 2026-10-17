@@ -90,9 +90,10 @@ find "${CHROOT}" -xdev \( -path "${CHROOT}/proc" -o -path "${CHROOT}/sys" \
      -o -path "${CHROOT}/mnt"  -o -path "${CHROOT}/media" \) -prune -o \
      \( -type f -o -type l \) -printf '%P\n' 2>/dev/null | LC_ALL=C sort -u > "${WORK}/allfiles"
 cut -f2 "${WORK}/paths.raw" | LC_ALL=C sort -u > "${WORK}/covered"
+sed 's|^|/|' "${WORK}/allfiles" | LC_ALL=C sort -u > "${WORK}/allfiles.slash"
 # 注意：sort 与 comm 必须用同一 collation（都加 LC_ALL=C），否则 comm 会报
 #       "file 1 is not in sorted order" 并给出错误结果
-LC_ALL=C comm -13 "${WORK}/covered" "${WORK}/allfiles" | awk '{print "system\t" $0}' > "${WORK}/leftovers.raw"
+LC_ALL=C comm -13 "${WORK}/covered" "${WORK}/allfiles.slash" | awk '{print "system\t" $0}' > "${WORK}/leftovers.raw"
 echo "I: 非包所有文件（hook 产物等）$(wc -l < "${WORK}/leftovers.raw") 个 ⇒ 兜底进 system（符号链接仍进 misc）"
 cat "${WORK}/leftovers.raw" >> "${WORK}/paths.raw"
 
@@ -118,7 +119,11 @@ awk -F'\t' -v work="${WORK}" '
       if (tgt == "") tgt = $1
     }
     if (p in dir) printf "%s%c", (work "/" tgt p), 0 > (work "/L-" tgt ".dirs")
-    else          printf "%s%c", p,                0 > (work "/L-" tgt ".paths")
+    else {
+        # 写成相对路径：钩子随后会 cd 到 chroot 再 cp，绝对路径会误指向构建机
+        rel = p; sub(/^\//, "", rel)
+        printf "%s%c", rel, 0 > (work "/L-" tgt ".paths")
+    }
   }
 ' "${WORK}/paths.raw"
 
