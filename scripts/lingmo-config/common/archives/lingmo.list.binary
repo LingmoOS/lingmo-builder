@@ -1,4 +1,4 @@
 # Lingmo OS Package Repository
 #
-deb http://download.opensuse.org/repositories/home:/LingmoOS/Debian_13 /
-# deb-src https://packages.lingmo.org/lingmo helium main non-free
+deb https://r2packages.lingmo.org unstable main
+# deb-src https://r2packages.lingmo.org unstable main
