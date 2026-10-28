@@ -50,7 +50,7 @@ zsh-syntax-highlighting
 # lingmo-desktop-xfce
 # lingmo-desktop-gnome
 # lingmo-desktop-kde
-lingmo-workspace-base
+# lingmo-workspace-base
 
 kernel-image
 

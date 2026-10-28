@@ -19,16 +19,6 @@ fonts-urw-base35
 
 git
 
-kactivities-bin
-kactivitymanagerd
-
-kdegraphics-thumbnailers
-kdialog
-keditbookmarks
-
-kio-extras
-kio-extras-data
-
 media-player-info
 
 mesa-va-drivers
@@ -68,14 +58,7 @@ frameworkintegration
 gdb-minimal
 iso-codes
 milou
-qml-module-qt-labs-folderlistmodel
-qml-module-qtgraphicaleffects
-qml-module-qtqml-models2
-qml-module-qtquick-controls
-qml-module-qtquick-dialogs
-qml-module-qtquick-layouts
-qml-module-qtquick-window2
-qml-module-qtquick2
+
 udisks2
 x11-utils
 x11-xserver-utils

@@ -23,12 +23,9 @@ zsh
 zsh-autosuggestions
 zsh-syntax-highlighting
 
-kget
 pulseaudio
 elisa
 okular
-kfind
-kgpg
 krdc
 ktorrent
 mediainfo
@@ -43,7 +40,6 @@ kdenlive
 # Graphical desktops
 lingmo-oobe
 sddm
-xorg
 
 # Live configs
 live-boot
@@ -99,5 +95,4 @@ lingmo-oobe
 lingmo-plymouth
 lingmo-shell-meta
 sddm-theme-lingmo
-velora-gtk-theme
 lingmo-wallpapers
