@@ -23,9 +23,6 @@ zsh
 zsh-autosuggestions
 zsh-syntax-highlighting
 
-pulseaudio
-elisa
-okular
 krdc
 ktorrent
 mediainfo
@@ -39,14 +36,12 @@ kdenlive
 
 # Graphical desktops
 lingmo-oobe
-sddm
 
 # Live configs
 live-boot
 lingmo-installer-config
 gparted
 dirmngr
-kscreen
 sound-theme-freedesktop
 vim
 
@@ -94,5 +89,7 @@ firmware-realtek
 lingmo-oobe
 lingmo-plymouth
 lingmo-shell-meta
-sddm-theme-lingmo
+xwayland
+x11-xserver-utils
+user-setup
 lingmo-wallpapers

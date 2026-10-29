@@ -1,6 +1,5 @@
 # App Store
 packagekit-tools 
-qml-module-org-kde-purpose
 
 # Office
 # libreoffice
@@ -27,5 +26,7 @@ ark
 lingmo-oobe
 lingmo-plymouth
 lingmo-shell-meta
-sddm-theme-lingmo
+xwayland
+x11-xserver-utils
+user-setup
 lingmo-wallpapers
