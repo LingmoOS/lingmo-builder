@@ -71,5 +71,11 @@ lingmo-plymouth
 lingmo-shell-meta
 xwayland
 x11-xserver-utils
+# Qt's platform plugins: Wayland for the native path, and what its xcb fallback
+# loads, so a Qt application without a Wayland plugin still starts.
+qt6-wayland
+libxcb-cursor0
+libxkbcommon-x11-0
+lingmo-qt-plugins
 user-setup
 lingmo-wallpapers
