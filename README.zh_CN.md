@@ -19,7 +19,7 @@ flowchart TB
     L1["live-image-&lt;arch&gt;.hybrid.iso"]
     L2["simple-cdd/images/lingmo-&lt;ver&gt;-&lt;arch&gt;-*.iso"]
     R["重命名与归档"]
-    OUT["scripts/images/lingmo-os-*.iso"]
+    OUT["scripts/images/lingmoOS-*.iso"]
 
     B -->|"--live"| AC
     CFG --> AC
@@ -35,8 +35,8 @@ flowchart TB
 
 | 流水线 | 工具链 | 配置根目录 | 中间产物 | 归档路径 |
 | --- | --- | --- | --- | --- |
-| live | live-build | `scripts/lingmo-config/` | `scripts/live-image-<arch>.hybrid.iso` | `scripts/images/lingmo-os-<sysver>-<vert>[-<buildver>]-desktop-<arch>.iso` |
-| installer | simple-cdd、debian-cd | `scripts/simple-cdd/` | `scripts/simple-cdd/images/lingmo-<ver>-<arch>-<type>-1.iso` | `scripts/images/lingmo-os-<ver>-installer[-<variant>]-<arch>.iso` |
+| live | live-build | `scripts/lingmo-config/` | `scripts/live-image-<arch>.hybrid.iso` | `scripts/images/lingmoOS-<sysver>-<vert>[-<buildver>]-desktop-<arch>.iso` |
+| installer | simple-cdd、debian-cd | `scripts/simple-cdd/` | `scripts/simple-cdd/images/lingmo-<ver>-<arch>-<type>-1.iso` | `scripts/images/lingmoOS-<ver>-installer[-<variant>]-<arch>.iso` |
 
 live 镜像包含 Calamares 安装器。安装完成后，Calamares 从目标系统移除自身与 live 组件。
 
@@ -337,17 +337,17 @@ flowchart TD
 live：
 
 ```
-lingmo-os-${LINGMO_SYS_VERSION}-${LINGMO_VERTYPE}-${LINGMO_BUILD_VER}-desktop-${LINGMO_ARCH}.${ext}
+lingmoOS-${LINGMO_SYS_VERSION}-${LINGMO_VERTYPE}-${LINGMO_BUILD_VER}-desktop-${LINGMO_ARCH}.${ext}
 ```
 
-当前取值 `5.0`、`canary`、`26a13`，输出示例 `lingmo-os-5.0-canary-26a13-desktop-amd64.iso`。
+当前取值 `5.0`、`canary`、`26a13`，输出示例 `lingmoOS-5.0-canary-26a13-desktop-amd64.iso`。
 
-`LINGMO_VARIANT` 不为 `default` 时，`LINGMO_VERTYPE` 与 `LINGMO_BUILD_VER` 之间不插入连字符，输出示例 `lingmo-os-5.0-canary26a13-desktop-amd64.iso`。该行为由 `target_image_name()` 的分支决定。
+`LINGMO_VARIANT` 不为 `default` 时，`LINGMO_VERTYPE` 与 `LINGMO_BUILD_VER` 之间不插入连字符，输出示例 `lingmoOS-5.0-canary26a13-desktop-amd64.iso`。该行为由 `target_image_name()` 的分支决定。
 
 installer：
 
 ```
-lingmo-os-${LINGMO_VERSION}-installer[-${LINGMO_VARIANT}]-${LINGMO_ARCH}.${ext}
+lingmoOS-${LINGMO_VERSION}-installer[-${LINGMO_VARIANT}]-${LINGMO_ARCH}.${ext}
 ```
 
 `LINGMO_VERSION` 默认为发行版代号（`trixie`），可由 `--version` 覆盖。
@@ -464,7 +464,7 @@ build-simple-cdd --verbose --debug --force-root --conf simple-cdd.conf \
 | 8 | 准备构建目录：`mkdir build && cp -r scripts/* build/ && cp .getopt.sh build/`，将 `variant-default` 转为符号链接 |
 | 9 | 执行 `cd build && sudo ./build.sh` |
 | 10 | 收集 `build/images/*.iso` 至 `artifact/`，通过 `actions/upload-artifact@v4` 上传为 `upload-iso`，`compression-level: 0` |
-| 11 | 推送至 `main`，或手动触发且勾选 `release` 时生成标签 `lingmo-os-$(generate_build_ver)`，格式为 `lingmo-os-<yyyymmddHHMM>.<short-sha>` |
+| 11 | 推送至 `main`，或手动触发且勾选 `release` 时生成标签 `lingmoOS-$(generate_build_ver)`，格式为 `lingmoOS-<yyyymmddHHMM>.<short-sha>` |
 | 12 | 发布 Release |
 
 步骤 5 的具体操作：

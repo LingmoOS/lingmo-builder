@@ -19,7 +19,7 @@ flowchart TB
     L1["live-image-&lt;arch&gt;.hybrid.iso"]
     L2["simple-cdd/images/lingmo-&lt;ver&gt;-&lt;arch&gt;-*.iso"]
     R["rename and archive"]
-    OUT["scripts/images/lingmo-os-*.iso"]
+    OUT["scripts/images/lingmoOS-*.iso"]
 
     B -->|"--live"| AC
     CFG --> AC
@@ -35,8 +35,8 @@ flowchart TB
 
 | Pipeline | Toolchain | Configuration root | Intermediate output | Archive path |
 | --- | --- | --- | --- | --- |
-| live | live-build | `scripts/lingmo-config/` | `scripts/live-image-<arch>.hybrid.iso` | `scripts/images/lingmo-os-<sysver>-<vert>[-<buildver>]-desktop-<arch>.iso` |
-| installer | simple-cdd, debian-cd | `scripts/simple-cdd/` | `scripts/simple-cdd/images/lingmo-<ver>-<arch>-<type>-1.iso` | `scripts/images/lingmo-os-<ver>-installer[-<variant>]-<arch>.iso` |
+| live | live-build | `scripts/lingmo-config/` | `scripts/live-image-<arch>.hybrid.iso` | `scripts/images/lingmoOS-<sysver>-<vert>[-<buildver>]-desktop-<arch>.iso` |
+| installer | simple-cdd, debian-cd | `scripts/simple-cdd/` | `scripts/simple-cdd/images/lingmo-<ver>-<arch>-<type>-1.iso` | `scripts/images/lingmoOS-<ver>-installer[-<variant>]-<arch>.iso` |
 
 The live image includes the Calamares installer. After installation, Calamares removes itself and the live components from the target system.
 
@@ -338,17 +338,17 @@ Adding or removing a layer requires changes in the following locations:
 live:
 
 ```
-lingmo-os-${LINGMO_SYS_VERSION}-${LINGMO_VERTYPE}-${LINGMO_BUILD_VER}-desktop-${LINGMO_ARCH}.${ext}
+lingmoOS-${LINGMO_SYS_VERSION}-${LINGMO_VERTYPE}-${LINGMO_BUILD_VER}-desktop-${LINGMO_ARCH}.${ext}
 ```
 
-Current values are `5.0`, `canary` and `26a13`; an example output is `lingmo-os-5.0-canary-26a13-desktop-amd64.iso`.
+Current values are `5.0`, `canary` and `26a13`; an example output is `lingmoOS-5.0-canary-26a13-desktop-amd64.iso`.
 
-When `LINGMO_VARIANT` is not `default`, no hyphen is inserted between `LINGMO_VERTYPE` and `LINGMO_BUILD_VER`; an example output is `lingmo-os-5.0-canary26a13-desktop-amd64.iso`. The behaviour is determined by the branches of `target_image_name()`.
+When `LINGMO_VARIANT` is not `default`, no hyphen is inserted between `LINGMO_VERTYPE` and `LINGMO_BUILD_VER`; an example output is `lingmoOS-5.0-canary26a13-desktop-amd64.iso`. The behaviour is determined by the branches of `target_image_name()`.
 
 installer:
 
 ```
-lingmo-os-${LINGMO_VERSION}-installer[-${LINGMO_VARIANT}]-${LINGMO_ARCH}.${ext}
+lingmoOS-${LINGMO_VERSION}-installer[-${LINGMO_VARIANT}]-${LINGMO_ARCH}.${ext}
 ```
 
 `LINGMO_VERSION` defaults to the distribution codename (`trixie`) and is overridden by `--version`.
@@ -465,7 +465,7 @@ The job runs in a `debian:testing` container with `--privileged` enabled.
 | 8 | Prepare the build directory: `mkdir build && cp -r scripts/* build/ && cp .getopt.sh build/`, convert `variant-default` to a symbolic link |
 | 9 | Execute `cd build && sudo ./build.sh` |
 | 10 | Collect `build/images/*.iso` into `artifact/` and upload as `upload-iso` with `actions/upload-artifact@v4`, `compression-level: 0` |
-| 11 | On a push to `main`, or a manual run with `release` selected, generate the tag `lingmo-os-$(generate_build_ver)` in the form `lingmo-os-<yyyymmddHHMM>.<short-sha>` |
+| 11 | On a push to `main`, or a manual run with `release` selected, generate the tag `lingmoOS-$(generate_build_ver)` in the form `lingmoOS-<yyyymmddHHMM>.<short-sha>` |
 | 12 | Publish the release |
 
 Details of step 5:
