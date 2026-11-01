@@ -1,11 +1,12 @@
 #!/bin/sh
 
-# Create lingmo user if not exist
+# The live account is lingmo/live. live-config may already have created it
+# with a locked password, so unlock and set it on every boot, not only for a
+# new account.
 if ! id -u lingmo >/dev/null 2>&1; then
     useradd -m -G sudo,audio,cdrom,dip,floppy,video,plugdev,netdev -s /bin/bash lingmo
-    # Change password to live
-    echo "lingmo:live" | chpasswd
 fi
+echo "lingmo:live" | chpasswd
 
 bash /usr/bin/add-calamares-desktop-icon
 
