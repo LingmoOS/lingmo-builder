@@ -16,7 +16,10 @@
   <project path="lib/libsysui" name="LingmoUI" revision="refs/tags/2.3.0" />
   <project path="lib/libsysqt" name="lingmo-qt-plugins" />
   <project path="lib/libsysqtxdg" name="libqtxdg" remote="nebula" />
-  <project path="shell/bc/Calculator" name="lingmo-calculator" revision="refs/tags/0.6.3" />
+  <project path="shell/bc/Calculator" name="lingmo-calculator" revision="main" />
+  <project path="shell/bc/ImageViewer" name="lingmo-image-viewer" />
+  <project path="shell/bc/Clock" name="lingmo-clock" />
+  <project path="shell/bc/ArchiveManager" name="lingmo-archive-manager" />
   <project path="shell/bc/Cursor" name="lingmo-cursor-themes" />
   <project path="shell/bc/DockPanel" name="lingmo-dock" revision="helium_dev" />
   <project path="shell/bc/Debinstaller" name="lingmo-debinstaller" />
