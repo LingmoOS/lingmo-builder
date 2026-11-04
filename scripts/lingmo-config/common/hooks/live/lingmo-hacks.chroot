@@ -66,6 +66,17 @@ apt autoremove -y | true
 systemctl enable lingmo-dm.service 2>/dev/null || true
 systemctl set-default graphical.target 2>/dev/null || true
 
+# Configure lingmo-dm to auto-login the live user without a password.
+# Debian live boots as "user"; the session is the default Lingmo Wayland
+# session.  Without this the display manager shows a greeter and the live
+# system never lands on the desktop.
+mkdir -p /etc/lingmo-dm
+cat > /etc/lingmo-dm.conf << EOF
+[Autologin]
+User=user
+Session=lingmo-wayland
+EOF
+
 # Install OnlyOffice —— 已注释停用（2026-10-14）
 # 原因：装完后约 0.7~1 GB，明显推高 ISO 体积；且构建时要联网下载 deb，
 #       上游改版或网络抖动都会让 ISO 构建失败。需要恢复时取消下面注释即可。
