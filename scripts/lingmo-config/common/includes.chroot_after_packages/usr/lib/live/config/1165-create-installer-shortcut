@@ -10,10 +10,8 @@ echo "lingmo:live" | chpasswd
 
 bash /usr/bin/add-calamares-desktop-icon
 
-# Auto start /usr/share/applications/install-lingmo.desktop
-mkdir -p /home/lingmo/.config/autostart
-cp /usr/share/applications/install-lingmo.desktop /home/lingmo/.config/autostart
-chmod 755 /home/lingmo/.config/autostart/install-lingmo.desktop
+# Installer startup is handled by /etc/xdg/autostart/lingmo-live-installer.desktop.
+# Do not copy an unshipped launcher into the Live user home.
 
 # Fix the permision of ~/.config dir
 chown -R lingmo /home/lingmo

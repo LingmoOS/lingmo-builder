@@ -35,8 +35,6 @@ kdenlive
 # lingmo-linux-large
 
 # Graphical desktops
-lingmo-oobe
-
 # Live configs
 live-boot
 lingmo-installer-config
@@ -86,7 +84,6 @@ firmware-qcom-media
 firmware-realtek
 
 # desktop
-lingmo-oobe
 lingmo-plymouth
 lingmo-shell-meta
 xwayland

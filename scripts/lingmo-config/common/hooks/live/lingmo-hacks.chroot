@@ -47,6 +47,11 @@ for pkg in $(dpkg-query -W -f'${db:Status-Status} ${binary:Package}\n' 'lingmo*'
   apt-mark manual $pkg | true
 done
 
+# OOBE is no longer part of the image, including transitive recommendations.
+if dpkg-query -W -f'${Status}' lingmo-oobe 2>/dev/null | grep -q "install ok installed"; then
+  apt-get purge -y lingmo-oobe || exit 1
+fi
+
 # Remove unwanted packages
 apt remove systemsettings -y | true
 apt remove plasma-desktop -y | true
@@ -67,13 +72,13 @@ systemctl enable lingmo-dm.service 2>/dev/null || true
 systemctl set-default graphical.target 2>/dev/null || true
 
 # Configure lingmo-dm to auto-login the live user without a password.
-# Debian live boots as "user"; the session is the default Lingmo Wayland
+# scripts/auto/config sets username=lingmo; the session is the default Lingmo Wayland
 # session.  Without this the display manager shows a greeter and the live
 # system never lands on the desktop.
 mkdir -p /etc/lingmo-dm
 cat > /etc/lingmo-dm.conf << EOF
 [Autologin]
-User=user
+User=lingmo
 Session=lingmo-wayland
 EOF
 
@@ -141,3 +146,6 @@ MinorVersion=${VERSION}
 OsBuild=${BUILD_VER}
 EOF
 chmod 644 /etc/os-version
+
+# Explicit Live-only installer autostart; never enabled on an installed root.
+chmod 755 /usr/bin/lingmo-live-installer

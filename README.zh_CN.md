@@ -523,3 +523,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
 
 待办事项与已知限制见 [TODO.md](TODO.md)。
+
+## Live installation and SourceForge publishing
+
+See [Live installation and publishing](docs/live-install-publish.md) for the no-OOBE workflow, automatic installer startup, regression tests, and required SourceForge Actions variables/secrets.

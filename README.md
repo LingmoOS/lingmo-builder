@@ -524,3 +524,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
 
 Open items and known limitations are listed in [TODO.md](TODO.md).
+
+## Live installation and SourceForge publishing
+
+See [Live installation and publishing](docs/live-install-publish.md) for the no-OOBE workflow, automatic installer startup, regression tests, and required SourceForge Actions variables/secrets.

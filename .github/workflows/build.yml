@@ -21,6 +21,9 @@ env:
 jobs:
   build:
     name: Build ISO of Lingmo OS
+    outputs:
+      iso-artifact-id: ${{ steps.iso-upload.outputs.artifact-id }}
+      build-version: ${{ steps.system-version.outputs.build-version }}
     runs-on: ubuntu-latest
     container:
       image: debian:testing
@@ -39,6 +42,7 @@ jobs:
 
       # 版本号一致性门禁：与 base-files 比对（不一致则失败）
       - name: Check system version consistency
+        id: system-version
         run: |
           set -e
           # 这一步在“安装系统依赖”之前，容器里可能还没有 python3
@@ -46,7 +50,8 @@ jobs:
           git clone --depth 1 https://github.com/LingmoOS/lingmo-version.git /tmp/lingmo-version
           git clone --depth 1 https://github.com/LingmoOS/base-files.git /tmp/base-files
           python3 /tmp/lingmo-version/lingmo-version check \
-              --base-files /tmp/base-files --builder "$PWD"
+              --base-files /tmp/base-files --builder "$PWD" --json > /tmp/lingmo-version.json
+          python3 tools/publish/version-directory.py /tmp/lingmo-version.json >> "$GITHUB_OUTPUT"
 
       - name: Install system dependencies
         run: |
@@ -58,12 +63,17 @@ jobs:
             mtools dosfstools \
             gpg cpio zstd \
             gettext \
-            sudo git jq
+            sudo git jq python3-yaml
           curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null
           chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
           apt-get update
           apt-get install -y gh
+
+      - name: Test Live startup and publication contract
+        run: |
+          python3 tests/test_live_release.py
+          bash -n tools/publish/sourceforge.sh
 
       # Lingmo 定制的 live-build（支持 LB_LIVE_DIR 改介质目录名）
       # ⚠️ 构建容器是 debian:testing(sid)，其 live-build(1:20250814) 版本**高于**我们
@@ -126,17 +136,21 @@ jobs:
           cp -v build/images/*.iso artifact/ 2>/dev/null || echo "No ISO in build/images/"
           find build -name "*.iso" -exec cp -v {} artifact/ \; 2>/dev/null || true
           if ! ls artifact/*.iso 2>/dev/null; then
-            echo "No ISO files found"
-            find build -maxdepth 3 -type f -name "*.iso" -o -name "*.hybrid.iso" 2>/dev/null | head -10
+            echo "No ISO files found" >&2
+            exit 1
           fi
 
+      - name: Generate checksum manifests and instructions
+        run: bash tools/publish/checksums.sh artifact
+
       - name: Upload ISO
+        id: iso-upload
         uses: actions/upload-artifact@v4
         with:
           name: upload-iso
           path: artifact/
           compression-level: 0
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Generate version tag
         id: version
@@ -198,3 +212,31 @@ jobs:
           fi
 
           echo "Release ${TAG} 完成"
+
+  publish-sourceforge:
+    name: Publish complete ISO to SourceForge
+    needs: build
+    if: always() && needs.build.outputs.iso-artifact-id != '' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: sourceforge-iso-publish
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: upload-iso
+          path: artifact
+      - name: Install upload tools
+        run: sudo apt-get update && sudo apt-get install -y rsync openssh-client
+      - name: Upload ISO, checksums and instructions
+        env:
+          SF_USERNAME: ${{ vars.SF_USERNAME }}
+          SF_PROJECT: ${{ vars.SF_PROJECT }}
+          SF_REMOTE_DIR: ${{ vars.SF_REMOTE_DIR }}
+          SF_BUILD_VERSION: ${{ needs.build.outputs.build-version }}
+          SF_SSH_PRIVATE_KEY: ${{ secrets.SF_SSH_PRIVATE_KEY }}
+          SF_KNOWN_HOSTS: ${{ secrets.SF_KNOWN_HOSTS }}
+        run: bash tools/publish/sourceforge.sh artifact

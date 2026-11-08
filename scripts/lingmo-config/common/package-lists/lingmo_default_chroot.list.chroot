@@ -66,7 +66,6 @@ packagekit
 openssh-server
 
 # desktop
-lingmo-oobe
 lingmo-plymouth
 lingmo-shell-meta
 xwayland
