@@ -20,7 +20,7 @@ DEBUG=""
 LINGMO_VERTYPE="unstable"
 LINGMO_SYS_VERSION="5.0"
 # LINGMO_BUILD_VER=$(generate_build_ver)
-LINGMO_BUILD_VER="26b03"
+LINGMO_BUILD_VER="26b04"
 RELEASE="lithium"
 HOST_ARCH=$(dpkg --print-architecture)
 
