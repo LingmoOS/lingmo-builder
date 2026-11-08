@@ -3,14 +3,14 @@
 DISTRO_NAME="Lingmo OS"
 VERSION="5.0"
 CODENAME="Lithium"
-BUILD_VER="26b02"
+BUILD_VER="26b03"
 DEBIAN_VER="13.7"
 VERSION_TYPE="Beta"
 VARIANT="Desktop"
 VARIANT_ID="desktop"
 
 BUILD_ID="$(date +%Y%m%d)"
-BUILD_TIME="26116171"
+BUILD_TIME="26118141"
 
 # Handle systems where /lib is not merged in /usr/lib
 if [ ! -h /lib ]; then
