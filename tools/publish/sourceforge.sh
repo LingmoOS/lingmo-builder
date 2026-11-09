@@ -52,11 +52,30 @@ sftp -b "$work/directories.sftp" -i "$work/key" \
     -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
     -o "UserKnownHostsFile=$work/known_hosts" "$SF_USERNAME@frs.sourceforge.net"
 destination="$SF_USERNAME,$SF_PROJECT@frs.sourceforge.net:$remote_root/"
-# Partial files stay hidden; publish each completed ISO by rename at the end.
-rsync -av --checksum --partial --partial-dir=.rsync-partial --delay-updates \
-    -e "$work/ssh" -- "${images[@]}" "$destination"
+# SourceForge's restricted rsync cannot create partial/delayed-update
+# directories. Use ordinary temporary-file + rename behaviour in the target.
+# Some server failures have returned zero: check diagnostics AND perform a
+# checksum dry-run before advertising any files as successfully published.
+upload_and_verify() {
+    local log="$work/transfer.log" differences="$work/differences.txt"
+    rsync -v --checksum --no-perms --no-owner --no-group \
+        -e "$work/ssh" -- "$@" "$destination" 2>&1 | tee "$log"
+    if grep -Eiq 'discarding completed file|Unable to create|Permission denied|rsync error:' "$log"; then
+        echo 'SourceForge reported a transfer failure; refusing to publish success.' >&2
+        return 1
+    fi
+    rsync --dry-run --checksum --itemize-changes --out-format='%i %n' \
+        --no-perms --no-owner --no-group -e "$work/ssh" \
+        -- "$@" "$destination" > "$differences"
+    if [[ -s "$differences" ]]; then
+        echo 'Remote files are missing or differ from local files after upload:' >&2
+        cat "$differences" >&2
+        return 1
+    fi
+}
+upload_and_verify "${images[@]}"
 checksums=();for tool in sha256sum sha512sum md5sum; do
     checksums+=("$source_dir/$tool.txt" "$source_dir/$tool.README")
 done
-rsync -av --checksum --delay-updates -e "$work/ssh" -- "${checksums[@]}" "$destination"
-echo "Published ${#images[@]} ISO file(s), checksum manifests and instructions to SourceForge."
+upload_and_verify "${checksums[@]}"
+echo "Published and remotely verified ${#images[@]} ISO file(s), checksum manifests and instructions on SourceForge."

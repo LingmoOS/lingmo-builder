@@ -25,7 +25,7 @@
 | Secret | SF_SSH_PRIVATE_KEY | 已在该 SourceForge 账户登记公钥的 SSH 私钥 |
 | Secret | SF_KNOWN_HOSTS | 从可信渠道核实的 frs.sourceforge.net SSH 主机密钥记录 |
 
-脚本将完整 .iso 上传至 /home/frs/project/<project>/<directory>/，成功后再上传对应 .iso.sha256。使用 rsync 校验、隐藏部分文件和完成后重命名；不删除远端其他文件。不要把私钥写入仓库。上传脚本通过 SFTP 逐级创建并进入目标版本目录，兼容 SourceForge 的旧版 rsync；上传错误会明确失败。
+脚本将完整 .iso 上传至 /home/frs/project/<project>/<directory>/，成功后再上传对应 .iso.sha256。使用 rsync 普通临时文件及完成后重命名，不使用服务端不支持的 partial-dir/delay-updates；不删除远端其他文件。不要把私钥写入仓库。上传脚本通过 SFTP 逐级创建并进入目标版本目录，兼容 SourceForge 的旧版 rsync；上传错误会明确失败。
 
 本轮只读检查发现仓库尚无上述 Actions 配置，因此尚未发生真实 SourceForge 上传。
 
@@ -46,3 +46,5 @@
 构建后在 artifact 内生成 sha256sum.txt、sha512sum.txt、md5sum.txt，以及 sha256sum.README、sha512sum.README、md5sum.README。清单仅包含 ISO 文件名和校验值，生成后立即用对应工具 --check 自检。README 包含 Linux、Windows PowerShell 和 macOS 用法及中文说明。上传先完成 ISO，再上传六个校验/说明文件；Actions artifact 也包含这些文件。MD5 仅兼容用途，优先使用 SHA-256/SHA-512。校验值未签名，不能代替发布者签名。
 
 SourceForge rsync 服务端不支持 --mkpath，因此先在 SFTP 批处理内逐级 -mkdir、cd；已存在目录可以复用，无法进入目录则停止上传。认证继续使用相同私钥及严格主机指纹校验；不关闭安全检查来规避 SSH 警告。
+
+上传完成后通过 rsync --dry-run --checksum --itemize-changes 对远端同名文件进行内容一致性检查。发现差异或缺失则失败；即使上传返回码为零，只要日志报告丢弃文件，也判定失败。ISO 验证通过后才上传清单和 README，所有文件验证通过后才输出发布成功。目录已存在导致 SFTP mkdir 报 Failure 可忽略，但后续 cd 必须成功。

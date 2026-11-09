@@ -37,7 +37,7 @@ class LiveRelease(unittest.TestCase):
 
     def upload_fixture(self,root):
         bin=root/"bin";bin.mkdir();log=root/"calls.jsonl";images=root/"artifact";images.mkdir();(images/"Lingmo test.iso").write_bytes(b"iso fixture")
-        rsync=bin/"rsync";rsync.write_text("#!/usr/bin/python3\nimport json,os,sys\nwith open(os.environ['CALL_LOG'],'a') as f:f.write(json.dumps(sys.argv[1:])+'\\n')\nassert os.path.isfile(os.environ['SF_UPLOAD_KEY'])\nassert os.path.isfile(os.environ['SF_UPLOAD_HOSTS'])\nsys.exit(int(os.environ.get('MOCK_RSYNC_EXIT','0')))\n")
+        rsync=bin/"rsync";rsync.write_text("#!/usr/bin/python3\nimport json,os,sys\nwith open(os.environ['CALL_LOG'],'a') as f:f.write(json.dumps(sys.argv[1:])+'\\n')\nassert os.path.isfile(os.environ['SF_UPLOAD_KEY'])\nassert os.path.isfile(os.environ['SF_UPLOAD_HOSTS'])\nif '--dry-run' in sys.argv and os.environ.get('MOCK_REMOTE_DIFFERENT'): print('>f+++++++++ missing.iso')\nif '--dry-run' not in sys.argv and os.environ.get('MOCK_DISCARD'): print('Unable to create partial-dir -- discarding completed file.',file=sys.stderr)\nsys.exit(int(os.environ.get('MOCK_RSYNC_EXIT','0')))\n")
         rsync.chmod(0o755)
         sftp=bin/"sftp"
         sftp.write_text("#!/usr/bin/python3\nimport json,os,sys,pathlib\nargs=sys.argv[1:]\nbatch=pathlib.Path(args[args.index('-b')+1]).read_text()\npathlib.Path(os.environ['SFTP_LOG']).write_text(json.dumps({'args':args,'batch':batch}))\nsys.exit(int(os.environ.get('MOCK_SFTP_EXIT','0')))\n")
@@ -51,10 +51,10 @@ class LiveRelease(unittest.TestCase):
             result=subprocess.run(["bash",str(UPLOAD),str(images)],env=env,text=True,capture_output=True)
             self.assertEqual(result.returncode,0,result.stderr)
             calls=[json.loads(line) for line in log.read_text().splitlines()]
-            self.assertEqual(len(calls),2);self.assertIn(str(images/"Lingmo test.iso"),calls[0]);self.assertIn(str(images/"sha256sum.txt"),calls[1])
+            self.assertEqual(len(calls),4);self.assertIn(str(images/"Lingmo test.iso"),calls[0]);self.assertIn(str(images/"sha256sum.txt"),calls[2])
             for tool in ("sha256sum","sha512sum","md5sum"):
-                self.assertIn(str(images/(tool+".txt")),calls[1]);self.assertIn(str(images/(tool+".README")),calls[1])
-            self.assertIn("--delay-updates",calls[0]);self.assertTrue(calls[0][-1].endswith("/home/frs/project/test-project/nightly/"))
+                self.assertIn(str(images/(tool+".txt")),calls[2]);self.assertIn(str(images/(tool+".README")),calls[2])
+            self.assertNotIn("--delay-updates",calls[0]);self.assertFalse(any(arg.startswith("--partial") for arg in calls[0]));self.assertIn("--dry-run",calls[1]);self.assertIn("--checksum",calls[1]);self.assertTrue(calls[0][-1].endswith("/home/frs/project/test-project/nightly/"))
             wrapper=Path(calls[0][calls[0].index("-e")+1]);self.assertFalse(wrapper.parent.exists())
             self.assertNotIn("fixture-key",result.stdout+result.stderr)
 
@@ -86,6 +86,20 @@ class LiveRelease(unittest.TestCase):
             for suffix in ("release","release/iso","release/iso/lithium","release/iso/lithium/26b03"):
                 path="/home/frs/project/test-project/"+suffix
                 self.assertIn('-mkdir "'+path+'"\ncd "'+path+'"',batch)
+
+    def test_zero_exit_discard_is_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            images,log,env=self.upload_fixture(Path(tmp));env["MOCK_DISCARD"]="1"
+            result=subprocess.run(["bash",str(UPLOAD),str(images)],env=env,capture_output=True,text=True)
+            self.assertNotEqual(result.returncode,0);self.assertNotIn("Published",result.stdout)
+            self.assertEqual(len(log.read_text().splitlines()),1)
+
+    def test_remote_checksum_difference_stops_metadata_upload(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            images,log,env=self.upload_fixture(Path(tmp));env["MOCK_REMOTE_DIFFERENT"]="1"
+            result=subprocess.run(["bash",str(UPLOAD),str(images)],env=env,capture_output=True,text=True)
+            self.assertNotEqual(result.returncode,0);self.assertNotIn("Published",result.stdout)
+            self.assertEqual(len(log.read_text().splitlines()),2)
 
     def test_sftp_failure_stops_before_upload(self):
         with tempfile.TemporaryDirectory() as tmp:
