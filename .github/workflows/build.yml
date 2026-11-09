@@ -233,9 +233,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y rsync openssh-client
       - name: Upload ISO, checksums and instructions
         env:
-          SF_USERNAME: ${{ vars.SF_USERNAME }}
-          SF_PROJECT: ${{ vars.SF_PROJECT }}
-          SF_REMOTE_DIR: ${{ vars.SF_REMOTE_DIR }}
+          SF_USERNAME: ${{ vars.SF_USERNAME || secrets.SF_USERNAME }}
+          SF_PROJECT: ${{ vars.SF_PROJECT || secrets.SF_PROJECT }}
+          SF_REMOTE_DIR: ${{ vars.SF_REMOTE_DIR || secrets.SF_REMOTE_DIR }}
           SF_BUILD_VERSION: ${{ needs.build.outputs.build-version }}
           SF_SSH_PRIVATE_KEY: ${{ secrets.SF_SSH_PRIVATE_KEY }}
           SF_KNOWN_HOSTS: ${{ secrets.SF_KNOWN_HOSTS }}
