@@ -39,7 +39,10 @@ class LiveRelease(unittest.TestCase):
         bin=root/"bin";bin.mkdir();log=root/"calls.jsonl";images=root/"artifact";images.mkdir();(images/"Lingmo test.iso").write_bytes(b"iso fixture")
         rsync=bin/"rsync";rsync.write_text("#!/usr/bin/python3\nimport json,os,sys\nwith open(os.environ['CALL_LOG'],'a') as f:f.write(json.dumps(sys.argv[1:])+'\\n')\nassert os.path.isfile(os.environ['SF_UPLOAD_KEY'])\nassert os.path.isfile(os.environ['SF_UPLOAD_HOSTS'])\nsys.exit(int(os.environ.get('MOCK_RSYNC_EXIT','0')))\n")
         rsync.chmod(0o755)
-        env=dict(os.environ,PATH=str(bin)+":"+os.environ["PATH"],CALL_LOG=str(log),SF_USERNAME="tester",SF_PROJECT="test-project",SF_REMOTE_DIR="nightly",SF_SSH_PRIVATE_KEY="fixture-key",SF_KNOWN_HOSTS="fixture-host")
+        sftp=bin/"sftp"
+        sftp.write_text("#!/usr/bin/python3\nimport json,os,sys,pathlib\nargs=sys.argv[1:]\nbatch=pathlib.Path(args[args.index('-b')+1]).read_text()\npathlib.Path(os.environ['SFTP_LOG']).write_text(json.dumps({'args':args,'batch':batch}))\nsys.exit(int(os.environ.get('MOCK_SFTP_EXIT','0')))\n")
+        sftp.chmod(0o755)
+        env=dict(os.environ,PATH=str(bin)+":"+os.environ["PATH"],CALL_LOG=str(log),SFTP_LOG=str(root/"sftp.json"),SF_USERNAME="tester",SF_PROJECT="test-project",SF_REMOTE_DIR="nightly",SF_SSH_PRIVATE_KEY="fixture-key",SF_KNOWN_HOSTS="fixture-host")
         return images,log,env
 
     def test_upload_complete_iso_then_checksum(self):
@@ -78,7 +81,18 @@ class LiveRelease(unittest.TestCase):
             self.assertEqual(result.returncode,0,result.stderr)
             calls=[json.loads(line) for line in log.read_text().splitlines()]
             self.assertTrue(calls[0][-1].endswith("/release/iso/lithium/26b03/"))
-            self.assertIn("--mkpath",calls[0])
+            self.assertNotIn("--mkpath",calls[0])
+            batch=json.loads((Path(tmp)/"sftp.json").read_text())["batch"]
+            for suffix in ("release","release/iso","release/iso/lithium","release/iso/lithium/26b03"):
+                path="/home/frs/project/test-project/"+suffix
+                self.assertIn('-mkdir "'+path+'"\ncd "'+path+'"',batch)
+
+    def test_sftp_failure_stops_before_upload(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            images,log,env=self.upload_fixture(Path(tmp));env["MOCK_SFTP_EXIT"]="1"
+            result=subprocess.run(["bash",str(UPLOAD),str(images)],env=env,capture_output=True)
+            self.assertNotEqual(result.returncode,0);self.assertFalse(log.exists())
+            self.assertTrue((Path(tmp)/"sftp.json").exists())
 
     def test_version_comes_from_lingmo_version_json(self):
         import runpy

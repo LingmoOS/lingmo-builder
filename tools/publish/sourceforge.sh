@@ -37,12 +37,26 @@ SSH
 chmod 700 "$work/ssh"
 export SF_UPLOAD_KEY="$work/key" SF_UPLOAD_HOSTS="$work/known_hosts"
 bash "$(dirname "$0")/checksums.sh" "$source_dir"
-destination="$SF_USERNAME,$SF_PROJECT@frs.sourceforge.net:/home/frs/project/$SF_PROJECT/$SF_REMOTE_DIR/"
+# SourceForge's rsync server does not support --mkpath. Its SFTP service
+# can create each level. Ignore mkdir's existing-directory error, but require
+# the following cd to succeed: missing permissions must stop before uploading.
+remote_root="/home/frs/project/$SF_PROJECT"
+printf 'cd "%s"\n' "$remote_root" > "$work/directories.sftp"
+IFS=/ read -r -a components <<< "$SF_REMOTE_DIR"
+for component in "${components[@]}"; do
+    [[ -n "$component" && "$component" != . ]] || continue
+    remote_root="$remote_root/$component"
+    printf -- '-mkdir "%s"\ncd "%s"\n' "$remote_root" "$remote_root" >> "$work/directories.sftp"
+done
+sftp -b "$work/directories.sftp" -i "$work/key" \
+    -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+    -o "UserKnownHostsFile=$work/known_hosts" "$SF_USERNAME@frs.sourceforge.net"
+destination="$SF_USERNAME,$SF_PROJECT@frs.sourceforge.net:$remote_root/"
 # Partial files stay hidden; publish each completed ISO by rename at the end.
-rsync -av --mkpath --checksum --partial --partial-dir=.rsync-partial --delay-updates \
+rsync -av --checksum --partial --partial-dir=.rsync-partial --delay-updates \
     -e "$work/ssh" -- "${images[@]}" "$destination"
 checksums=();for tool in sha256sum sha512sum md5sum; do
     checksums+=("$source_dir/$tool.txt" "$source_dir/$tool.README")
 done
-rsync -av --mkpath --checksum --delay-updates -e "$work/ssh" -- "${checksums[@]}" "$destination"
+rsync -av --checksum --delay-updates -e "$work/ssh" -- "${checksums[@]}" "$destination"
 echo "Published ${#images[@]} ISO file(s), checksum manifests and instructions to SourceForge."
