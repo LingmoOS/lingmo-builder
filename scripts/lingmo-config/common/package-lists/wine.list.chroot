@@ -1,0 +1,9 @@
+# Native manager plus Wine runtime. The multiarch hook adds 32-bit support.
+#if ARCHITECTURES amd64
+lingmo-wine
+wine
+wine64
+fonts-wine
+fonts-liberation
+xwayland
+#endif
