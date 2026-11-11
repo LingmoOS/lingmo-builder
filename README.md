@@ -4,6 +4,24 @@ ISO build repository for Lingmo OS.
 
 License: GNU General Public License v3.0, see [LICENSE](LICENSE).
 
+
+## amd64 Live kernel
+
+The amd64 Live image selects `linux-image-6.18.62-lingmo` and
+`linux-headers-6.18.62-lingmo` from the Lingmo stable APT repository
+(package version verified: `6.18.62-1+lingmo5u1`). `auto/config` passes
+`--linux-flavours 6.18.62-lingmo`; the package list no longer pulls in the
+Debian `linux-image-amd64`/`linux-headers-amd64` metapackages. Both build-time
+and installed-system repository lists include stable for amd64, alongside
+unstable. Other architectures retain their previous kernel selection.
+
+Use a fresh live-build build directory/cache when switching kernels: changing
+configuration does not remove a kernel from an existing chroot. The Calamares
+Live install inherits this kernel from the image. The separate simple-cdd
+Debian Installer pipeline still uses its Debian installer kernel and mirror;
+this change does not replace its boot udebs or configure a custom-kernel mirror.
+A full ISO boot, Secure Boot and DKMS validation remain required.
+
 ## Architecture
 
 The repository contains two independent build pipelines, selected by `--live` (default) or `--installer` on `scripts/build.sh`.

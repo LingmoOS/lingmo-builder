@@ -93,7 +93,8 @@ fi
 # Define options that vary across architectures
 case "$arch" in
     amd64)
-	# lb_opts="$lb_opts --debian-installer live"
+	# Exact package suffix, not Debian's rolling linux-image-amd64 meta package.
+	lb_opts="$lb_opts --linux-flavours 6.18.62-lingmo"
     ;;
     i386)
 	# lb_opts="$lb_opts --debian-installer live --linux-flavours 686-pae"

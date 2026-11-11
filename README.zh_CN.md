@@ -4,6 +4,21 @@ Lingmo OS 的 ISO 构建仓库。
 
 许可证：GNU General Public License v3.0，见 [LICENSE](LICENSE)。
 
+
+## amd64 Live 内核
+
+amd64 Live 镜像指定使用 Lingmo stable APT 源中的
+`linux-image-6.18.62-lingmo` 和 `linux-headers-6.18.62-lingmo`
+（已核对包版本 `6.18.62-1+lingmo5u1`）。`auto/config` 传入
+`--linux-flavours 6.18.62-lingmo`，包清单不再引入 Debian 的
+`linux-image-amd64` / `linux-headers-amd64` 元包。构建期和目标系统的
+APT 清单在保留 unstable 的同时为 amd64 添加 stable。其他架构保持原内核选择。
+
+切换内核时使用新的 live-build 构建目录/缓存：仅修改配置不会清除已有 chroot
+中的旧内核。Calamares Live 安装会继承镜像内核。独立的 simple-cdd Debian
+Installer 流水线仍使用 Debian 安装器内核与镜像源；本修改不替换其启动 udebs，
+也不配置其自定义内核镜像源。完整 ISO 启动、Secure Boot 和 DKMS 仍需实机验证。
+
 ## 架构
 
 仓库包含两条相互独立的构建流水线，由 `scripts/build.sh` 的 `--live`（默认）与 `--installer` 参数选择。

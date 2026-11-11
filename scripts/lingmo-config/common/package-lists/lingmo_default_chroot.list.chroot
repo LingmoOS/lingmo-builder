@@ -20,8 +20,7 @@ grub-pc
 # For GRUB for EFI
 efibootmgr
 
-# Linux image
-linux-image-amd64
+# Kernel image and matching headers are selected in linux-headers.list.chroot.
 
 # Live configs
 live-boot
