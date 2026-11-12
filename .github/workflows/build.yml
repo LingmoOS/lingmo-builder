@@ -73,6 +73,7 @@ jobs:
       - name: Test Live startup and publication contract
         run: |
           python3 tests/test_live_release.py
+          python3 tests/test_broadcom_download.py
           bash -n tools/publish/sourceforge.sh
 
       # Lingmo 定制的 live-build（支持 LB_LIVE_DIR 改介质目录名）
@@ -112,6 +113,11 @@ jobs:
         run: |
           ln -sf sid /usr/share/live/build/data/debian-cd/trixie 2>/dev/null || true
       
+      # Trixie's -26 driver fails to build against the selected 6.18 kernel.
+      # Keep the Debian base suite unchanged; stage only this verified driver.
+      - name: Download Broadcom DKMS for Linux 6.18
+        run: bash tools/ci/download-broadcom.sh
+
       - name: Prepare build environment
         run: |
           mkdir -p build
