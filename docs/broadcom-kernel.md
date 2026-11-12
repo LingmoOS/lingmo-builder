@@ -24,3 +24,19 @@ and hash together when changing drivers. Only amd64 CI is covered.
 Validation: `python3 tests/test_broadcom_download.py` covers step ordering,
 repeat staging, failed downloads, hash/metadata mismatch, temporary cleanup
 and preservation of an existing package. No root or network is used by tests.
+
+## Target toolchain and failed-build evidence
+
+Run 43172239517 selected the staged -32 package correctly, but its chroot
+package log contains cpp-14 and gcc-14-base, not the GCC compiler. DKMS 3.2.2
+only Recommends `gcc | c-compiler`; live-build is configured with
+`--apt-recommends false`. The headers list therefore explicitly includes
+build-essential and, for amd64's 6.18.62-lingmo kernel, gcc-14. Installing a
+compiler in the outer CI container does not install one in the target chroot.
+
+After a failure CI collects build.log, apt/dpkg logs, DKMS make.log files and
+compiler/package version diagnostics into the build-diagnostics artifact.
+It does not collect DKMS signing keys. This is needed to establish the precise
+compiler error if a new build still fails; the previous run did not retain it.
+`python3 tests/test_build_diagnostics.py` exercises collection and toolchain
+configuration without using the host package manager or a real chroot.
