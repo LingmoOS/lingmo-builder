@@ -3,7 +3,12 @@ fcitx5-frontend-qt5
 fcitx5-frontend-qt6
 fcitx5-module-cloudpinyin
 fcitx5-modules
+fcitx5-rime
 im-config
+librime-data
+rime-data-luna-pinyin
+rime-data-pinyin-simp
+rime-essay
 
 fonts-noto
 fonts-noto-cjk-extra
