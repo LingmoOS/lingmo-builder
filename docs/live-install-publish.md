@@ -2,12 +2,12 @@
 
 ## Live 与安装后行为
 
-- common 和 everything 包列表均移除 lingmo-oobe；构建 hook 也会清除依赖推荐带入的 OOBE。
+- common 和 everything 镜像包含 `lingmo-oobe`，安装后的首次会话由 `lingmo-dm` 启动 OOBE。
 - 正常/安全启动参数与 Lingmo DM 均使用 lingmo 用户。
 - 全局 XDG autostart 启动 /usr/bin/lingmo-live-installer。脚本仅在 /proc/cmdline 包含 boot=live 时执行，检查安装器可执行文件，使用 flock 防止并发启动。
 - 废弃复制不存在的 install-lingmo.desktop 的旧逻辑，程序坞入口改为实际提供的 lingmo-installer-config.desktop。
 - 安装器使用唯一密码规则 minLength: 1；密码确认仍必须一致。不使用 libpwquality 长度/复杂度/字典规则。
-- 用户与时区在安装器设置。安装后的 DM 会话直接使用 lingmo-wayland，按用户选择启用或关闭自动登录，不启用 firstboot.service。
+- 用户与时区在安装器设置。安装后的 DM 首次自动登录进入 `lingmo-oobe`，完成后写入用户标记；后续启动自动进入 `lingmo-wayland`。
 - 安装结束清除 /etc/debian_chroot、Live 安装器自启动项、本地 file:/cdrom: 软件源；同时处理 .list 和 deb822 .sources，保留独立的远程仓库和签名设置。
 - 清理模块从 Calamares globalstorage 获取 rootMountPoint，拒绝 / 和逃出目标系统的路径。清理本身不要求联网。
 

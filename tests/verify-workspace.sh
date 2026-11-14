@@ -4,7 +4,7 @@ workspace=$(cd "$(dirname "$0")/../.." && pwd)
 export PYTHONDONTWRITEBYTECODE=1
 python3 "$workspace/lingmo-installer-config/tests/test_installed_system.py"
 python3 "$workspace/lingmo-builder/tests/test_live_release.py"
-python3 "$workspace/lingmo-installer-firstboot/tests/test_account_handoff.py"
+python3 "$workspace/lingmo-oobe/tests/test_state.py"
 bash -n "$workspace/lingmo-builder/tools/publish/sourceforge.sh"
 bash -n "$workspace/lingmo-builder/scripts/lingmo-config/common/hooks/live/lingmo-hacks.chroot"
 bash -n "$workspace/lingmo-builder/scripts/auto/config"

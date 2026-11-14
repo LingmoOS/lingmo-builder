@@ -12,9 +12,9 @@ UPLOAD=SOURCE/"tools/publish/sourceforge.sh"
 LIVE=SOURCE/"scripts/lingmo-config/common/includes.chroot_after_packages/usr/bin/lingmo-live-installer"
 
 class LiveRelease(unittest.TestCase):
-    def test_no_oobe_in_any_package_list(self):
-        for path in (SOURCE/"scripts/lingmo-config").rglob("*.list.chroot"):
-            self.assertNotIn("lingmo-oobe",[line.strip() for line in path.read_text().splitlines()],str(path))
+    def test_oobe_is_not_removed_by_the_live_hook(self):
+        hook = (SOURCE/"scripts/lingmo-config/common/hooks/live/lingmo-hacks.chroot").read_text()
+        self.assertNotIn("apt-get purge -y lingmo-oobe", hook)
 
     def test_live_user_and_launcher_names_agree(self):
         config=(SOURCE/"scripts/auto/config").read_text()
