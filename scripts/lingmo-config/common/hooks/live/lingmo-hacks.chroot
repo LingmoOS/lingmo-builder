@@ -93,10 +93,10 @@ chmod +x /bin/config-installer
 rm /usr/lib/os-release
 
 cat > /usr/lib/os-release <<EOF
-PRETTY_NAME="${DISTRO_NAME} ${VERSION} (${CODENAME})"
+PRETTY_NAME="${DISTRO_NAME} ${VERSION} (${BUILD_VER})"
 NAME="${DISTRO_NAME}"
 VERSION_ID="${VERSION}"
-VERSION="${VERSION} (${CODENAME})"
+VERSION="${VERSION} (${CODENAME}) ${BUILD_VER}"
 BUILD_VERSION="${BUILD_VER}"
 BUILD_ID="${BUILD_ID}"
 BUILD_TIME="${BUILD_TIME}"

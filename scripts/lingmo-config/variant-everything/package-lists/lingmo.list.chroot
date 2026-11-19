@@ -55,6 +55,7 @@ gwenview
 # Input Methods
 fcitx5
 fcitx5-chinese-addons
+fcitx5-rime
 
 # CJK Fonts
 fonts-noto-cjk
