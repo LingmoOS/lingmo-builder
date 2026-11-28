@@ -7,8 +7,7 @@ packagekit-tools
 # Use OnlyOffice now
 
 # Video
-vlc
-vlc-l10n
+libmpv2
 
 # Email
 thunderbird
@@ -20,7 +19,7 @@ krita-l10n
 inkscape
 
 # Archiver
-ark
+# ark
 
 # desktop
 lingmo-plymouth

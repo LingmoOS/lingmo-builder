@@ -56,6 +56,13 @@ gwenview
 fcitx5
 fcitx5-chinese-addons
 fcitx5-rime
+librime-data
+librime1t64
+rime-data-luna-pinyin
+rime-data-pinyin-simp
+rime-data-stroke
+rime-essay
+rime-prelude
 
 # CJK Fonts
 fonts-noto-cjk

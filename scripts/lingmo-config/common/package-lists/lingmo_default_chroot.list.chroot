@@ -56,7 +56,7 @@ libspa-0.2-bluetooth
 
 # WLAN
 hostapd
-wpagui
+# wpagui
 wpasupplicant
 dbus
 
