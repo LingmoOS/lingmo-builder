@@ -10,7 +10,7 @@ VARIANT="Desktop"
 VARIANT_ID="desktop"
 
 BUILD_ID="$(date +%Y%m%d)"
-BUILD_TIME="2611190228"
+BUILD_TIME="261128032"
 
 # Handle systems where /lib is not merged in /usr/lib
 if [ ! -h /lib ]; then
